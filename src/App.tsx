@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Principle, UserProgress } from './types';
+import { Principle, UserProgress, ContextKey } from './types';
 import { ALL_PRINCIPLES, getPrincipleById } from './data/principles';
-import { loadProgress, saveProgress, clearProgress } from './utils/storage';
+import { loadProgress, saveProgress, clearAllProgress } from './utils/storage';
 import { Header } from './components/Header';
 import { Hero } from './components/Hero';
 import { BookIntroduction } from './components/BookIntroduction';
@@ -20,6 +20,7 @@ export function App() {
   const [activePrincipleModal, setActivePrincipleModal] = useState<Principle | null>(null);
   const [isBookmarksOpen, setIsBookmarksOpen] = useState<boolean>(false);
   const [selectedPartFilter, setSelectedPartFilter] = useState<number | null>(null);
+  const [selectedContext, setSelectedContext] = useState<ContextKey | 'all'>('all');
   const [activeSection, setActiveSection] = useState<string>('');
 
   // Save progress changes to localStorage
@@ -96,9 +97,18 @@ export function App() {
     }));
   };
 
-  // Handler for Reset Progress
-  const handleResetProgress = () => {
-    clearProgress();
+  // Handler for Resetting 30-Day Practice Only (preserves reflections & bookmarks)
+  const handleResetPracticeOnly = () => {
+    setProgress((prev) => ({
+      ...prev,
+      completedDays: [],
+      lastUpdated: new Date().toISOString(),
+    }));
+  };
+
+  // Handler for Clearing All App Data
+  const handleClearAllData = () => {
+    clearAllProgress();
     setProgress({
       completedDays: [],
       reflections: {},
@@ -155,7 +165,10 @@ export function App() {
         <BookIntroduction />
 
         {/* 3. Real-world Application Contexts (Business, Sales, Teaching, Leadership) */}
-        <ApplicationOverview />
+        <ApplicationOverview
+          selectedContext={selectedContext}
+          onSelectContext={setSelectedContext}
+        />
 
         {/* 4. Four-Part Learning Roadmap */}
         <LearningRoadmap
@@ -169,13 +182,16 @@ export function App() {
           onToggleBookmark={handleToggleBookmark}
           selectedPartId={selectedPartFilter}
           onSelectPartId={(partId) => setSelectedPartFilter(partId)}
+          selectedContext={selectedContext}
+          onSelectContext={setSelectedContext}
         />
 
         {/* 6. 30-Day Habit Practice Plan */}
         <PracticePlan
           progress={progress}
           onToggleCompleted={handleToggleCompleted}
-          onResetProgress={handleResetProgress}
+          onResetPracticeOnly={handleResetPracticeOnly}
+          onClearAllData={handleClearAllData}
           onOpenDetail={(principle) => setActivePrincipleModal(principle)}
         />
 
@@ -207,6 +223,7 @@ export function App() {
           onSaveReflection={handleSaveReflection}
           hasPrev={currentPrincipleIndex > 0}
           hasNext={currentPrincipleIndex < ALL_PRINCIPLES.length - 1}
+          initialContext={selectedContext}
         />
       )}
 
@@ -223,3 +240,4 @@ export function App() {
 }
 
 export default App;
+

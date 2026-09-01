@@ -1,9 +1,17 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Briefcase, ShoppingBag, GraduationCap, Users, ArrowRight, CheckCircle2 } from 'lucide-react';
 import { ContextKey } from '../types';
 
-export const ApplicationOverview: React.FC = () => {
-  const [selectedContext, setSelectedContext] = useState<ContextKey>('business');
+interface ApplicationOverviewProps {
+  selectedContext: ContextKey | 'all';
+  onSelectContext: (context: ContextKey) => void;
+}
+
+export const ApplicationOverview: React.FC<ApplicationOverviewProps> = ({
+  selectedContext,
+  onSelectContext,
+}) => {
+  const activeKey: ContextKey = selectedContext === 'all' ? 'business' : selectedContext;
 
   const contextData: Record<
     ContextKey,
@@ -34,7 +42,7 @@ export const ApplicationOverview: React.FC = () => {
         'ဘုံရည်မှန်းချက်များကို အရင်ဆုံး သဘောတူညီမှု ရယူပါ',
       ],
       practicalAdvice: 'အလုပ်တွင် လူထက် အကြောင်းအရာကို ဦးစားပေးပြီး၊ အဖွဲ့သားတစ်ဦးချင်းစီ၏ အားသာချက်ကို အသိအမှတ်ပြုပါ။',
-      quote: '"စီးပွားရေးလုပ်ငန်းတစ်ခု၏ အကြီးမားဆုံး အရင်းအနှီးမှာ ငွေကြေးမဟုတ်ဘဲ လူသားများ၏ ပူးပေါင်းဆောင်ရွက်မှု ဖြစ်သည်။"',
+      quote: '“စီးပွားရေးလုပ်ငန်းတစ်ခု၏ အကြီးမားဆုံး အရင်းအနှီးမှာ ငွေကြေးမဟုတ်ဘဲ လူသားများ၏ ပူးပေါင်းဆောင်ရွက်မှု ဖြစ်သည်။”',
     },
     sales: {
       label: 'Sales',
@@ -50,7 +58,7 @@ export const ApplicationOverview: React.FC = () => {
         'ကုန်ပစ္စည်းထက် Customer ရရှိမည့် အကျိုးကျေးဇူးကို အဓိကထားပါ',
       ],
       practicalAdvice: 'လူတို့သည် ပစ္စည်းကို အဝယ်မခံချင်ကြပါ၊ မိမိတို့စိတ်ဆန္ဒဖြင့် ဝယ်ယူရခြင်းကိုသာ နှစ်သက်ကြသည်။',
-      quote: '"အရောင်းသမားကောင်းသည် ကုန်ပစ္စည်းကို မရောင်းဘဲ Customer အတွက် အဖြေကို ရှာဖွေပေးသူဖြစ်သည်။"',
+      quote: '“အရောင်းသမားကောင်းသည် ကုန်ပစ္စည်းကို မရောင်းဘဲ Customer အတွက် အဖြေကို ရှာဖွေပေးသူဖြစ်သည်။”',
     },
     teaching: {
       label: 'Teaching',
@@ -66,7 +74,7 @@ export const ApplicationOverview: React.FC = () => {
         'ကျောင်းသားဖြစ်လာနိုင်သည့် ကောင်းမွန်သော ပုံရိပ်ကို ကြိုတင်ပေးပါ',
       ],
       practicalAdvice: 'ဆရာ၏ နွေးထွေးသော အပြုံးနှင့် အသိအမှတ်ပြုမှုသည် ကလေးတစ်ဦး၏ ဘဝတစ်ခုလုံးကို ပြောင်းလဲစေနိုင်သည်။',
-      quote: '"ပညာသင်ကြားခြင်းဆိုသည်မှာ ပုံးအလွတ်ထဲသို့ ရေဖြည့်ခြင်းမဟုတ်ဘဲ မီးတောက်ကို မွေးမြူပေးခြင်းဖြစ်သည်။"',
+      quote: '“ပညာသင်ကြားခြင်းဆိုသည်မှာ ပုံးအလွတ်ထဲသို့ ရေဖြည့်ခြင်းမဟုတ်ဘဲ မီးတောက်ကို မွေးမြူပေးခြင်းဖြစ်သည်။”',
     },
     leadership: {
       label: 'Leadership',
@@ -82,11 +90,11 @@ export const ApplicationOverview: React.FC = () => {
         'အခြားသူ၏ အမှားမပြောမီ မိမိအမှားကို အရင်ပြောပါ',
       ],
       practicalAdvice: 'ခေါင်းဆောင်ကောင်းသည် နောက်လိုက်များကို မွေးထုတ်သည်မဟုတ်ဘဲ နောက်ထပ် ခေါင်းဆောင်အသစ်များကို မွေးဖွားပေးသည်။',
-      quote: '"ခေါင်းဆောင်မှုဆိုသည်မှာ အခြားသူများအား သူတို့ကိုယ်တိုင် မသိသေးသော စွမ်းရည်များကို မြင်လာအောင် ကူညီပေးခြင်းဖြစ်သည်။"',
+      quote: '“ခေါင်းဆောင်မှုဆိုသည်မှာ အခြားသူများအား သူတို့ကိုယ်တိုင် မသိသေးသော စွမ်းရည်များကို မြင်လာအောင် ကူညီပေးခြင်းဖြစ်သည်။”',
     },
   };
 
-  const current = contextData[selectedContext];
+  const current = contextData[activeKey];
 
   return (
     <section id="applications" className="py-16 sm:py-20 bg-[#FBF9F5] border-b border-[#EFE9DD]">
@@ -106,18 +114,21 @@ export const ApplicationOverview: React.FC = () => {
         </div>
 
         {/* 4 Context Selectors / Tabs */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 mb-8">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 mb-8" role="tablist" aria-label="လက်တွေ့နယ်ပယ် ရွေးချယ်မှု">
           {(Object.keys(contextData) as ContextKey[]).map((key) => {
             const item = contextData[key];
             const Icon = item.icon;
-            const isSelected = selectedContext === key;
+            const isSelected = activeKey === key;
 
             return (
               <button
                 key={key}
                 id={`context-tab-btn-${key}`}
-                onClick={() => setSelectedContext(key)}
-                className={`flex flex-col items-start p-4 sm:p-5 rounded-2xl border transition-all text-left ${
+                role="tab"
+                aria-selected={isSelected}
+                aria-controls={`context-panel-${key}`}
+                onClick={() => onSelectContext(key)}
+                className={`flex flex-col items-start p-4 sm:p-5 rounded-2xl border transition-all text-left min-h-[44px] ${
                   isSelected
                     ? 'bg-[#FFFDF9] shadow-sm ring-2 ring-[#2D5A43] border-transparent'
                     : 'bg-[#F5EFE4] hover:bg-[#EFE7D8] border-[#E2D8C7]'
@@ -144,7 +155,12 @@ export const ApplicationOverview: React.FC = () => {
         </div>
 
         {/* Selected Context Card Overview */}
-        <div className="bg-[#FFFDF9] rounded-2xl p-6 sm:p-8 lg:p-10 border border-[#E2D8C7] shadow-xs">
+        <div
+          id={`context-panel-${activeKey}`}
+          role="tabpanel"
+          aria-labelledby={`context-tab-btn-${activeKey}`}
+          className="bg-[#FFFDF9] rounded-2xl p-6 sm:p-8 lg:p-10 border border-[#E2D8C7] shadow-xs"
+        >
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
             
             <div className="lg:col-span-7 space-y-4">
@@ -181,7 +197,7 @@ export const ApplicationOverview: React.FC = () => {
             <div className="lg:col-span-5 bg-[#F8F4EC] rounded-xl p-6 border border-[#E8E0D2] space-y-4">
               <div>
                 <p className="text-xs font-bold text-[#C25E3E] uppercase tracking-wider mb-1">
-                  အဓိက ဆောင်ပုဒ်နှင့် အကြံပြုချက်
+                  အဓိက အကြံပြုချက်
                 </p>
                 <p className="text-xs sm:text-sm italic text-[#3E3831] leading-relaxed">
                   {current.quote}
@@ -189,17 +205,17 @@ export const ApplicationOverview: React.FC = () => {
               </div>
 
               <div className="pt-3 border-t border-[#E2D8C7]">
-                <p className="text-xs text-[#5A5245] leading-relaxed">
+                <p className="text-xs sm:text-sm text-[#5A5245] leading-relaxed">
                   <strong>လက်တွေ့ လုပ်ဆောင်ရန်:</strong> {current.practicalAdvice}
                 </p>
               </div>
 
               <a
                 href="#lessons"
-                className="inline-flex items-center gap-2 text-xs font-bold text-[#2D5A43] hover:underline pt-1"
+                className="inline-flex items-center gap-2 text-xs sm:text-sm font-bold text-[#2D5A43] hover:underline pt-1 min-h-[44px]"
               >
-                <span>{current.label} နှင့် သက်ဆိုင်သော သဘောတရားများ ရှာဖွေမည်</span>
-                <ArrowRight className="w-3.5 h-3.5" />
+                <span>{current.label} ရှုထောင့်ဖြင့် သဘောတရား ၃၀ လုံး ကြည့်ရှုမည်</span>
+                <ArrowRight className="w-4 h-4" />
               </a>
             </div>
 
@@ -210,3 +226,4 @@ export const ApplicationOverview: React.FC = () => {
     </section>
   );
 };
+

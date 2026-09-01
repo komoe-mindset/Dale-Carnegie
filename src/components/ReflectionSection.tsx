@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { UserProgress, Principle } from '../types';
 import { ALL_PRINCIPLES } from '../data/principles';
-import { Sparkles, BookOpen, Send, CheckCircle2, Copy, Download, Trash2, Edit3 } from 'lucide-react';
+import { Edit3, Send, CheckCircle2, Copy, Download, Trash2, BookOpen } from 'lucide-react';
 
 interface ReflectionSectionProps {
   progress: UserProgress;
@@ -19,6 +19,11 @@ export const ReflectionSection: React.FC<ReflectionSectionProps> = ({
   const [copiedToast, setCopiedToast] = useState(false);
   const [savedToast, setSavedToast] = useState(false);
 
+  // Sync inputText if progress.reflections changes from another source (e.g. modal)
+  useEffect(() => {
+    setInputText(progress.reflections[selectedDay] || '');
+  }, [selectedDay, progress.reflections]);
+
   const selectedPrinciple = ALL_PRINCIPLES.find((p) => p.dayPractice.day === selectedDay) || ALL_PRINCIPLES[0];
 
   const handleSelectDay = (day: number) => {
@@ -33,23 +38,56 @@ export const ReflectionSection: React.FC<ReflectionSectionProps> = ({
     setTimeout(() => setSavedToast(false), 2000);
   };
 
+  const handleDeleteSingleReflection = (day: number, e: React.MouseEvent) => {
+    e.stopPropagation();
+    onSaveReflection(day, '');
+    if (selectedDay === day) {
+      setInputText('');
+    }
+  };
+
   const recordedEntries = Object.entries(progress.reflections).filter(
     ([_, text]) => typeof text === 'string' && text.trim() !== ''
   ) as [string, string][];
 
-  const handleCopyToClipboard = () => {
-    let summary = 'Dale Carnegie မိတ်ဆွေတိုးပွား လူချစ်များနည်း - ကျွန်ုပ်၏ လေ့ကျင့်ရေး မှတ်စုများ\n\n';
+  const generateExportText = () => {
+    let summary = '===================================================\n';
+    summary += 'Dale Carnegie လူတွေနဲ့ ပိုကောင်းစွာ ဆက်ဆံတတ်ဖို့ - လေ့ကျင့်ရေး မှတ်စုများ\n';
+    summary += `ရက်စွဲ: ${new Date().toLocaleDateString()}\n`;
+    summary += '===================================================\n\n';
+
     recordedEntries.forEach(([dayStr, note]) => {
       const day = parseInt(dayStr, 10);
       const p = ALL_PRINCIPLES.find((item) => item.dayPractice.day === day);
       if (p) {
-        summary += `Day ${day} - ${p.title} (${p.englishTitle}):\n${note}\n\n`;
+        summary += `[Day ${day}] ${p.title} (${p.englishTitle})\n`;
+        summary += `ဆင်ခြင်ရန် မေးခွန်း: "${p.reflectionQuestion}"\n`;
+        summary += `ကျွန်ုပ်၏ အတွေးအမြင်/လက်တွေ့မှတ်စု:\n${note}\n\n`;
+        summary += '---------------------------------------------------\n\n';
       }
     });
 
+    return summary;
+  };
+
+  const handleCopyToClipboard = () => {
+    const summary = generateExportText();
     navigator.clipboard.writeText(summary);
     setCopiedToast(true);
     setTimeout(() => setCopiedToast(false), 2500);
+  };
+
+  const handleDownloadTextFile = () => {
+    const summary = generateExportText();
+    const blob = new Blob([summary], { type: 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `Dale_Carnegie_Reflections_${new Date().toISOString().slice(0, 10)}.txt`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
   };
 
   return (
@@ -84,7 +122,7 @@ export const ReflectionSection: React.FC<ReflectionSectionProps> = ({
                 id="reflection-day-select"
                 value={selectedDay}
                 onChange={(e) => handleSelectDay(parseInt(e.target.value, 10))}
-                className="w-full p-3 rounded-xl border border-[#D5CBB9] bg-[#FAF7F0] text-sm text-[#2C2926] font-medium focus:ring-2 focus:ring-[#2D5A43] focus:outline-hidden"
+                className="w-full p-3.5 rounded-xl border border-[#D5CBB9] bg-[#FAF7F0] text-sm text-[#2C2926] font-medium focus:ring-2 focus:ring-[#2D5A43] focus:outline-hidden min-h-[44px]"
               >
                 {ALL_PRINCIPLES.map((p) => (
                   <option key={p.id} value={p.dayPractice.day}>
@@ -101,10 +139,12 @@ export const ReflectionSection: React.FC<ReflectionSectionProps> = ({
                   Day {selectedDay} ဆင်ခြင်သုံးသပ်ရန် မေးခွန်း:
                 </span>
                 <button
+                  id={`read-principle-btn-${selectedPrinciple.id}`}
                   onClick={() => onOpenDetail(selectedPrinciple)}
-                  className="text-xs font-semibold text-[#2D5A43] hover:underline"
+                  className="text-xs font-semibold text-[#2D5A43] hover:underline inline-flex items-center gap-1 min-h-[36px]"
                 >
-                  သဘောတရားဖတ်မည် →
+                  <BookOpen className="w-3.5 h-3.5" />
+                  <span>သဘောတရားဖတ်မည် →</span>
                 </button>
               </div>
               <p className="text-xs sm:text-sm text-[#3E3831] italic leading-relaxed">
@@ -126,7 +166,7 @@ export const ReflectionSection: React.FC<ReflectionSectionProps> = ({
                 className="w-full p-4 rounded-xl border border-[#D5CBB9] bg-[#FAF7F0] text-sm text-[#2C2926] focus:ring-2 focus:ring-[#2D5A43] focus:outline-hidden resize-none leading-relaxed"
               />
 
-              <div className="flex items-center justify-between pt-1">
+              <div className="flex flex-wrap items-center justify-between gap-3 pt-1">
                 {savedToast ? (
                   <span className="text-xs font-bold text-[#2D5A43] flex items-center gap-1.5 animate-fadeIn">
                     <CheckCircle2 className="w-4 h-4" /> မှတ်စု သိမ်းဆည်းပြီးပါပြီ
@@ -140,7 +180,7 @@ export const ReflectionSection: React.FC<ReflectionSectionProps> = ({
                 <button
                   type="submit"
                   id="submit-reflection-btn"
-                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#2D5A43] hover:bg-[#234735] text-white font-semibold text-xs sm:text-sm shadow-xs transition-colors"
+                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#2D5A43] hover:bg-[#234735] text-white font-semibold text-xs sm:text-sm shadow-xs transition-colors min-h-[44px]"
                 >
                   <Send className="w-4 h-4" />
                   <span>မှတ်စု သိမ်းမည်</span>
@@ -152,7 +192,7 @@ export const ReflectionSection: React.FC<ReflectionSectionProps> = ({
 
           {/* Right Column: Saved Reflections Journal Overview */}
           <div className="lg:col-span-5 bg-[#FFFDF9] rounded-2xl p-6 sm:p-8 border border-[#E2D8C7] shadow-xs space-y-5">
-            <div className="flex items-center justify-between pb-3 border-b border-[#F0EAE1]">
+            <div className="flex flex-wrap items-center justify-between gap-2 pb-3 border-b border-[#F0EAE1]">
               <div>
                 <h3 className="font-serif-heading font-bold text-base text-[#1E3E2E]">
                   သိမ်းဆည်းထားသော မှတ်စုများ ({recordedEntries.length})
@@ -161,15 +201,29 @@ export const ReflectionSection: React.FC<ReflectionSectionProps> = ({
               </div>
 
               {recordedEntries.length > 0 && (
-                <button
-                  id="copy-all-reflections-btn"
-                  onClick={handleCopyToClipboard}
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#F5EFE4] hover:bg-[#EAE0CF] text-[#4A4036] text-xs font-semibold border border-[#DDD3BF] transition-colors"
-                  title="မှတ်စုအားလုံး ကူးယူရန်"
-                >
-                  <Copy className="w-3.5 h-3.5" />
-                  <span>{copiedToast ? 'ကူးယူပြီး' : 'Copy All'}</span>
-                </button>
+                <div className="flex items-center gap-1.5">
+                  <button
+                    id="download-all-reflections-btn"
+                    onClick={handleDownloadTextFile}
+                    className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-[#F5EFE4] hover:bg-[#EAE0CF] text-[#4A4036] text-xs font-semibold border border-[#DDD3BF] transition-colors min-h-[36px]"
+                    title="Text ဖိုင်ဖြင့် သိမ်းဆည်းရန်"
+                    aria-label="မှတ်စုအားလုံး Text ဖိုင်ဖြင့် Download ရယူမည်"
+                  >
+                    <Download className="w-3.5 h-3.5" />
+                    <span>Download</span>
+                  </button>
+
+                  <button
+                    id="copy-all-reflections-btn"
+                    onClick={handleCopyToClipboard}
+                    className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-[#F5EFE4] hover:bg-[#EAE0CF] text-[#4A4036] text-xs font-semibold border border-[#DDD3BF] transition-colors min-h-[36px]"
+                    title="မှတ်စုအားလုံး ကူးယူရန်"
+                    aria-label="မှတ်စုအားလုံး ကူးယူမည်"
+                  >
+                    <Copy className="w-3.5 h-3.5" />
+                    <span>{copiedToast ? 'ကူးယူပြီး' : 'Copy'}</span>
+                  </button>
+                </div>
               )}
             </div>
 
@@ -192,7 +246,7 @@ export const ReflectionSection: React.FC<ReflectionSectionProps> = ({
                     <div
                       key={day}
                       onClick={() => handleSelectDay(day)}
-                      className={`p-3.5 rounded-xl border transition-all cursor-pointer ${
+                      className={`p-3.5 rounded-xl border transition-all cursor-pointer group ${
                         selectedDay === day
                           ? 'bg-[#E8EFEA] border-[#2D5A43]/40'
                           : 'bg-[#F9F6F0] hover:bg-[#F2ECE1] border-[#E8E0D2]'
@@ -202,7 +256,17 @@ export const ReflectionSection: React.FC<ReflectionSectionProps> = ({
                         <span className="text-xs font-bold text-[#1E3E2E]">
                           Day {day} • {p.title}
                         </span>
-                        <span className="text-[10px] text-[#7A7163]">နှိပ်၍ ပြင်ဆင်ရန်</span>
+                        <div className="flex items-center gap-1.5">
+                          <span className="text-[10px] text-[#7A7163]">ပြင်ဆင်ရန်</span>
+                          <button
+                            onClick={(e) => handleDeleteSingleReflection(day, e)}
+                            className="text-[#B3261E] hover:text-[#8C1D18] p-1 rounded-sm opacity-60 group-hover:opacity-100 transition-opacity"
+                            title={`Day ${day} မှတ်စု ဖျက်မည်`}
+                            aria-label={`Day ${day} မှတ်စု ဖျက်မည်`}
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
                       </div>
                       <p className="text-xs text-[#4A4036] line-clamp-2 leading-relaxed">
                         {text}
@@ -220,3 +284,4 @@ export const ReflectionSection: React.FC<ReflectionSectionProps> = ({
     </section>
   );
 };
+

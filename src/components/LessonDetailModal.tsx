@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Principle, ContextKey } from '../types';
 import {
   X,
@@ -15,7 +15,6 @@ import {
   Sparkles,
   BookOpen,
   Send,
-  Calendar,
 } from 'lucide-react';
 
 interface LessonDetailModalProps {
@@ -30,6 +29,7 @@ interface LessonDetailModalProps {
   onSaveReflection: (day: number, text: string) => void;
   hasPrev: boolean;
   hasNext: boolean;
+  initialContext?: ContextKey | 'all';
 }
 
 export const LessonDetailModal: React.FC<LessonDetailModalProps> = ({
@@ -44,26 +44,62 @@ export const LessonDetailModal: React.FC<LessonDetailModalProps> = ({
   onSaveReflection,
   hasPrev,
   hasNext,
+  initialContext = 'business',
 }) => {
-  const [activeContext, setActiveContext] = useState<ContextKey>('business');
+  const getValidContext = (ctx?: string): ContextKey => {
+    if (ctx === 'sales' || ctx === 'teaching' || ctx === 'leadership') {
+      return ctx;
+    }
+    return 'business';
+  };
+
+  const [activeContext, setActiveContext] = useState<ContextKey>(() => getValidContext(initialContext));
   const [reflectionText, setReflectionText] = useState('');
   const [isSavedToast, setIsSavedToast] = useState(false);
+  const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Lock body scroll while modal is open
+  useEffect(() => {
+    const originalStyle = window.getComputedStyle(document.body).overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = originalStyle;
+    };
+  }, []);
 
   useEffect(() => {
     if (principle) {
       setReflectionText(userReflection || '');
-      setActiveContext('business');
+      setActiveContext(getValidContext(initialContext));
     }
-  }, [principle, userReflection]);
+  }, [principle, userReflection, initialContext]);
+
+  // Debounced auto-save on typing reflection
+  const handleReflectionChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const newText = e.target.value;
+    setReflectionText(newText);
+
+    if (principle) {
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current);
+      }
+      debounceTimerRef.current = setTimeout(() => {
+        onSaveReflection(principle.dayPractice.day, newText);
+      }, 600);
+    }
+  };
 
   // Keyboard navigation & escape listener
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
+      const activeTag = (document.activeElement?.tagName || '').toLowerCase();
+      const isInputActive = activeTag === 'input' || activeTag === 'textarea';
+
       if (e.key === 'Escape') {
         onClose();
-      } else if (e.key === 'ArrowLeft' && hasPrev) {
+      } else if (!isInputActive && e.key === 'ArrowLeft' && hasPrev) {
         onNavigate('prev');
-      } else if (e.key === 'ArrowRight' && hasNext) {
+      } else if (!isInputActive && e.key === 'ArrowRight' && hasNext) {
         onNavigate('next');
       }
     };
@@ -78,6 +114,9 @@ export const LessonDetailModal: React.FC<LessonDetailModalProps> = ({
 
   const handleSaveNote = (e: React.FormEvent) => {
     e.preventDefault();
+    if (debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current);
+    }
     onSaveReflection(principle.dayPractice.day, reflectionText);
     setIsSavedToast(true);
     setTimeout(() => setIsSavedToast(false), 2500);
@@ -114,7 +153,7 @@ export const LessonDetailModal: React.FC<LessonDetailModalProps> = ({
             <button
               id="modal-toggle-complete-btn"
               onClick={() => onToggleCompleted(principle.dayPractice.day)}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors border ${
+              className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold transition-colors border min-h-[40px] ${
                 isCompleted
                   ? 'bg-[#E8EFEA] text-[#2D5A43] border-[#C5D9CB]'
                   : 'bg-[#F2ECE1] text-[#5A5245] border-[#DDD3BF] hover:bg-[#EAE0CF]'
@@ -130,7 +169,8 @@ export const LessonDetailModal: React.FC<LessonDetailModalProps> = ({
             <button
               id="modal-bookmark-btn"
               onClick={() => onToggleBookmark(principle.id)}
-              className={`p-2 rounded-lg transition-colors ${
+              aria-label={isBookmarked ? 'မှတ်သားမှု ပယ်ဖျက်မည်' : 'မှတ်သားမည်'}
+              className={`p-2.5 rounded-lg transition-colors min-h-[40px] min-w-[40px] flex items-center justify-center ${
                 isBookmarked
                   ? 'text-[#C25E3E] bg-[#FBECE7]'
                   : 'text-[#5A5245] hover:text-[#1E3E2E] hover:bg-[#F2ECE1]'
@@ -144,7 +184,7 @@ export const LessonDetailModal: React.FC<LessonDetailModalProps> = ({
             <button
               id="modal-close-btn"
               onClick={onClose}
-              className="p-2 text-[#5A5245] hover:text-[#1E3E2E] hover:bg-[#F2ECE1] rounded-lg transition-colors"
+              className="p-2.5 text-[#5A5245] hover:text-[#1E3E2E] hover:bg-[#F2ECE1] rounded-lg transition-colors min-h-[40px] min-w-[40px] flex items-center justify-center"
               aria-label="Close dialog"
             >
               <X className="w-6 h-6" />
@@ -253,7 +293,7 @@ export const LessonDetailModal: React.FC<LessonDetailModalProps> = ({
             </div>
 
             {/* Context Selector Buttons */}
-            <div className="flex flex-wrap gap-2 pb-2 border-b border-[#F0EAE1]">
+            <div className="flex flex-wrap gap-2 pb-2 border-b border-[#F0EAE1]" role="tablist" aria-label="လက်တွေ့ အသုံးချမှု နယ်ပယ်များ">
               {(
                 [
                   { key: 'business', label: 'Business', icon: Briefcase },
@@ -268,8 +308,11 @@ export const LessonDetailModal: React.FC<LessonDetailModalProps> = ({
                   <button
                     key={tab.key}
                     id={`modal-context-tab-${tab.key}`}
+                    role="tab"
+                    aria-selected={isActive}
+                    aria-controls={`modal-context-panel-${tab.key}`}
                     onClick={() => setActiveContext(tab.key)}
-                    className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold transition-all ${
+                    className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold transition-all min-h-[40px] ${
                       isActive
                         ? 'bg-[#2D5A43] text-white shadow-xs'
                         : 'bg-[#F2ECE1] text-[#5A5245] hover:bg-[#EAE0CF]'
@@ -283,7 +326,12 @@ export const LessonDetailModal: React.FC<LessonDetailModalProps> = ({
             </div>
 
             {/* Context Active Content */}
-            <div className="space-y-3 bg-[#FAF7F0] p-4 sm:p-5 rounded-xl border border-[#E8E0D2]">
+            <div
+              id={`modal-context-panel-${activeContext}`}
+              role="tabpanel"
+              aria-labelledby={`modal-context-tab-${activeContext}`}
+              className="space-y-3 bg-[#FAF7F0] p-4 sm:p-5 rounded-xl border border-[#E8E0D2]"
+            >
               <div className="flex items-center justify-between">
                 <h4 className="font-bold text-sm text-[#1E3E2E]">
                   {contextData.title}
@@ -338,9 +386,9 @@ export const LessonDetailModal: React.FC<LessonDetailModalProps> = ({
                 <textarea
                   id={`reflection-input-${principle.id}`}
                   value={reflectionText}
-                  onChange={(e) => setReflectionText(e.target.value)}
+                  onChange={handleReflectionChange}
                   placeholder="သင့်အတွေး သို့မဟုတ် လက်တွေ့လုပ်ဆောင်ခဲ့မှုကို ဤနေရာတွင် ရေးမှတ်ပါ..."
-                  className="w-full h-20 p-2.5 rounded-xl border border-[#D5CBB9] bg-[#FAF7F0] text-xs text-[#2C2926] focus:outline-hidden focus:ring-2 focus:ring-[#2D5A43] resize-none"
+                  className="w-full h-20 p-2.5 rounded-xl border border-[#D5CBB9] bg-[#FAF7F0] text-xs text-[#2C2926] focus:outline-hidden focus:ring-2 focus:ring-[#2D5A43] resize-none leading-relaxed"
                 />
                 <div className="flex items-center justify-between">
                   {isSavedToast ? (
@@ -348,12 +396,12 @@ export const LessonDetailModal: React.FC<LessonDetailModalProps> = ({
                       <CheckCircle2 className="w-3.5 h-3.5" /> မှတ်စု သိမ်းဆည်းပြီးပါပြီ
                     </span>
                   ) : (
-                    <span className="text-[11px] text-[#7A7163]">မှတ်စုများကို သင့်ဖုန်း/ကွန်ပျူတာတွင် အလိုအလျောက် သိမ်းထားပါမည်</span>
+                    <span className="text-[11px] text-[#7A7163]">စာရိုက်ပြီးသည်နှင့် အလိုအလျောက် သိမ်းဆည်းပါသည်</span>
                   )}
                   <button
                     type="submit"
                     id={`save-reflection-btn-${principle.id}`}
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#2D5A43] hover:bg-[#234735] text-white text-xs font-semibold shadow-xs"
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#2D5A43] hover:bg-[#234735] text-white text-xs font-semibold shadow-xs min-h-[36px]"
                   >
                     <Send className="w-3 h-3" />
                     <span>မှတ်စုသိမ်းမည်</span>
@@ -372,7 +420,7 @@ export const LessonDetailModal: React.FC<LessonDetailModalProps> = ({
             id="modal-prev-principle-btn"
             onClick={() => onNavigate('prev')}
             disabled={!hasPrev}
-            className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all ${
+            className={`flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-all min-h-[44px] ${
               hasPrev
                 ? 'bg-[#FFFDF9] text-[#2C2926] hover:bg-[#EAE0CF] border border-[#D5CBB9]'
                 : 'opacity-40 cursor-not-allowed text-[#8A8174]'
@@ -390,7 +438,7 @@ export const LessonDetailModal: React.FC<LessonDetailModalProps> = ({
             id="modal-next-principle-btn"
             onClick={() => onNavigate('next')}
             disabled={!hasNext}
-            className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all ${
+            className={`flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-all min-h-[44px] ${
               hasNext
                 ? 'bg-[#2D5A43] text-white hover:bg-[#234735] shadow-xs'
                 : 'opacity-40 cursor-not-allowed text-[#8A8174]'
@@ -405,3 +453,4 @@ export const LessonDetailModal: React.FC<LessonDetailModalProps> = ({
     </div>
   );
 };
+

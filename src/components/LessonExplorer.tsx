@@ -10,6 +10,8 @@ interface LessonExplorerProps {
   onToggleBookmark: (id: number) => void;
   selectedPartId: number | null;
   onSelectPartId: (partId: number | null) => void;
+  selectedContext: ContextKey | 'all';
+  onSelectContext: (context: ContextKey | 'all') => void;
 }
 
 export const LessonExplorer: React.FC<LessonExplorerProps> = ({
@@ -18,21 +20,16 @@ export const LessonExplorer: React.FC<LessonExplorerProps> = ({
   onToggleBookmark,
   selectedPartId,
   onSelectPartId,
+  selectedContext,
+  onSelectContext,
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
-  const [contextFilter, setContextFilter] = useState<ContextKey | 'all'>('all');
 
   const filteredPrinciples = useMemo(() => {
     return ALL_PRINCIPLES.filter((principle) => {
       // Filter by Part
       if (selectedPartId !== null && principle.partId !== selectedPartId) {
         return false;
-      }
-
-      // Filter by Context
-      if (contextFilter !== 'all') {
-        const hasContext = principle.contexts[contextFilter];
-        if (!hasContext) return false;
       }
 
       // Filter by Search Query (Title, keywords, english title, meaning, contexts)
@@ -44,17 +41,29 @@ export const LessonExplorer: React.FC<LessonExplorerProps> = ({
         const taglineMatch = principle.tagline.toLowerCase().includes(query);
         const actionMatch = principle.actionStep.toLowerCase().includes(query);
         const exampleMatch = principle.realLifeExample.toLowerCase().includes(query);
-        const idMatch = principle.id.toString() === query;
+        const badMatch = principle.whatNotToDo.description.toLowerCase().includes(query) ||
+                         principle.whatNotToDo.badDialogue.toLowerCase().includes(query);
+        const betterMatch = principle.whatToDo.description.toLowerCase().includes(query) ||
+                            principle.whatToDo.goodDialogue.toLowerCase().includes(query);
+        const reflectionMatch = principle.reflectionQuestion.toLowerCase().includes(query);
+        const habitMatch = principle.dayPractice.activity.toLowerCase().includes(query) ||
+                           principle.dayPractice.reflectionPrompt.toLowerCase().includes(query) ||
+                           principle.dayPractice.habitTip.toLowerCase().includes(query);
+        const idMatch = principle.id.toString() === query || `day ${principle.dayPractice.day}`.includes(query);
 
         // check context content
         const businessMatch = principle.contexts.business.scenario.toLowerCase().includes(query) ||
-                              principle.contexts.business.advice.toLowerCase().includes(query);
+                              principle.contexts.business.advice.toLowerCase().includes(query) ||
+                              principle.contexts.business.keyTakeaway.toLowerCase().includes(query);
         const salesMatch = principle.contexts.sales.scenario.toLowerCase().includes(query) ||
-                           principle.contexts.sales.advice.toLowerCase().includes(query);
+                           principle.contexts.sales.advice.toLowerCase().includes(query) ||
+                           principle.contexts.sales.keyTakeaway.toLowerCase().includes(query);
         const teachingMatch = principle.contexts.teaching.scenario.toLowerCase().includes(query) ||
-                              principle.contexts.teaching.advice.toLowerCase().includes(query);
+                              principle.contexts.teaching.advice.toLowerCase().includes(query) ||
+                              principle.contexts.teaching.keyTakeaway.toLowerCase().includes(query);
         const leadershipMatch = principle.contexts.leadership.scenario.toLowerCase().includes(query) ||
-                                principle.contexts.leadership.advice.toLowerCase().includes(query);
+                                principle.contexts.leadership.advice.toLowerCase().includes(query) ||
+                                principle.contexts.leadership.keyTakeaway.toLowerCase().includes(query);
 
         return (
           titleMatch ||
@@ -63,6 +72,10 @@ export const LessonExplorer: React.FC<LessonExplorerProps> = ({
           taglineMatch ||
           actionMatch ||
           exampleMatch ||
+          badMatch ||
+          betterMatch ||
+          reflectionMatch ||
+          habitMatch ||
           idMatch ||
           businessMatch ||
           salesMatch ||
@@ -73,11 +86,11 @@ export const LessonExplorer: React.FC<LessonExplorerProps> = ({
 
       return true;
     });
-  }, [selectedPartId, contextFilter, searchQuery]);
+  }, [selectedPartId, searchQuery]);
 
   const clearAllFilters = () => {
     setSearchQuery('');
-    setContextFilter('all');
+    onSelectContext('all');
     onSelectPartId(null);
   };
 
@@ -193,7 +206,7 @@ export const LessonExplorer: React.FC<LessonExplorerProps> = ({
             </div>
 
             {/* Context Filters */}
-            <div className="flex items-center gap-1.5 overflow-x-auto pb-1 lg:pb-0">
+            <div className="flex items-center gap-1.5 overflow-x-auto pb-1 lg:pb-0" role="tablist" aria-label="လက်တွေ့နယ်ပယ် ရှုထောင့် ရွေးချယ်မှု">
               <span className="text-xs font-bold text-[#6B6357] shrink-0 mr-1">
                 နယ်ပယ်:
               </span>
@@ -209,10 +222,12 @@ export const LessonExplorer: React.FC<LessonExplorerProps> = ({
                 <button
                   key={ctx.key}
                   id={`filter-context-${ctx.key}`}
-                  onClick={() => setContextFilter(ctx.key)}
-                  className={`px-2.5 py-1 rounded-lg text-xs font-medium shrink-0 transition-colors ${
-                    contextFilter === ctx.key
-                      ? 'bg-[#1E3E2E] text-white font-semibold'
+                  role="tab"
+                  aria-selected={selectedContext === ctx.key}
+                  onClick={() => onSelectContext(ctx.key)}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-medium shrink-0 transition-colors min-h-[36px] ${
+                    selectedContext === ctx.key
+                      ? 'bg-[#1E3E2E] text-white font-semibold shadow-xs'
                       : 'bg-[#F5EFE4] text-[#5A5245] hover:bg-[#EFE7D8]'
                   }`}
                 >
@@ -228,7 +243,7 @@ export const LessonExplorer: React.FC<LessonExplorerProps> = ({
             <span>
               ရလဒ် စုစုပေါင်း <strong>{filteredPrinciples.length}</strong> ခု တွေ့ရှိပါသည်
             </span>
-            {(selectedPartId !== null || contextFilter !== 'all' || searchQuery !== '') && (
+            {(selectedPartId !== null || selectedContext !== 'all' || searchQuery !== '') && (
               <button
                 id="reset-all-filters-btn"
                 onClick={clearAllFilters}
@@ -258,7 +273,7 @@ export const LessonExplorer: React.FC<LessonExplorerProps> = ({
             <button
               id="empty-state-reset-btn"
               onClick={clearAllFilters}
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-[#2D5A43] text-white text-xs font-semibold hover:bg-[#234735] shadow-xs"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-[#2D5A43] text-white text-xs font-semibold hover:bg-[#234735] shadow-xs min-h-[44px]"
             >
               <span>မူလအတိုင်း အားလုံး ပြန်ကြည့်မည်</span>
             </button>
@@ -278,6 +293,7 @@ export const LessonExplorer: React.FC<LessonExplorerProps> = ({
                   onToggleBookmark={onToggleBookmark}
                   onOpenDetail={onOpenDetail}
                   isCompleted={isCompleted}
+                  activeContext={selectedContext}
                 />
               );
             })}

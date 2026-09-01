@@ -1,6 +1,6 @@
 import React from 'react';
-import { Principle } from '../types';
-import { Bookmark, ArrowRight, CheckCircle2, Sparkles, Briefcase, ShoppingBag, GraduationCap, Users } from 'lucide-react';
+import { Principle, ContextKey } from '../types';
+import { Bookmark, ArrowRight, CheckCircle2, Briefcase, ShoppingBag, GraduationCap, Users } from 'lucide-react';
 
 interface LessonCardProps {
   principle: Principle;
@@ -8,6 +8,7 @@ interface LessonCardProps {
   onToggleBookmark: (id: number) => void;
   onOpenDetail: (principle: Principle) => void;
   isCompleted: boolean;
+  activeContext: ContextKey | 'all';
 }
 
 export const LessonCard: React.FC<LessonCardProps> = ({
@@ -16,7 +17,18 @@ export const LessonCard: React.FC<LessonCardProps> = ({
   onToggleBookmark,
   onOpenDetail,
   isCompleted,
+  activeContext,
 }) => {
+  const contextMeta: Record<
+    ContextKey,
+    { label: string; icon: typeof Briefcase; bg: string; text: string; border: string }
+  > = {
+    business: { label: 'Business', icon: Briefcase, bg: '#E8EFEA', text: '#1E3E2E', border: '#C5D9CB' },
+    sales: { label: 'Sales', icon: ShoppingBag, bg: '#FBECE7', text: '#8C3A21', border: '#F3CFC4' },
+    teaching: { label: 'Teaching', icon: GraduationCap, bg: '#E6F0F5', text: '#1C4D6B', border: '#BDD7E6' },
+    leadership: { label: 'Leadership', icon: Users, bg: '#F3EBF7', text: '#4E2F63', border: '#DECCE6' },
+  };
+
   return (
     <article
       id={`lesson-card-${principle.id}`}
@@ -50,8 +62,8 @@ export const LessonCard: React.FC<LessonCardProps> = ({
               e.stopPropagation();
               onToggleBookmark(principle.id);
             }}
-            aria-label={isBookmarked ? 'Remove bookmark' : 'Bookmark this principle'}
-            className={`p-1.5 rounded-lg transition-colors ${
+            aria-label={isBookmarked ? `သဘောတရား #${principle.id} မှတ်သားမှု ပယ်ဖျက်မည်` : `သဘောတရား #${principle.id} သိမ်းဆည်းမှတ်သားမည်`}
+            className={`p-2 rounded-lg transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center ${
               isBookmarked
                 ? 'text-[#C25E3E] bg-[#FBECE7]'
                 : 'text-[#8A8174] hover:text-[#2C2926] hover:bg-[#F2ECE1]'
@@ -75,29 +87,55 @@ export const LessonCard: React.FC<LessonCardProps> = ({
           </p>
         </div>
 
-        {/* Action Step Quick Highlight */}
-        <div className="bg-[#F8F5EE] rounded-xl p-3 border border-[#EBE4D5] text-xs text-[#3E3831] space-y-1">
-          <div className="flex items-center gap-1.5 font-bold text-[#2D5A43]">
-            <CheckCircle2 className="w-3.5 h-3.5" />
-            <span>Action Step</span>
+        {/* Dynamic Context Perspective Box OR Action Step */}
+        {activeContext !== 'all' ? (
+          <div
+            className="rounded-xl p-3.5 border space-y-1.5 transition-all text-xs"
+            style={{
+              backgroundColor: contextMeta[activeContext].bg,
+              borderColor: contextMeta[activeContext].border,
+            }}
+          >
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-1.5 font-bold" style={{ color: contextMeta[activeContext].text }}>
+                {React.createElement(contextMeta[activeContext].icon, { className: 'w-3.5 h-3.5' })}
+                <span>{contextMeta[activeContext].label} လက်တွေ့ ရှုထောင့်</span>
+              </div>
+              <span className="text-[10px] font-semibold opacity-90 px-1.5 py-0.5 rounded bg-white/70">
+                {principle.contexts[activeContext].keyTakeaway}
+              </span>
+            </div>
+            <p className="line-clamp-2 leading-relaxed text-[#3E3831]">
+              <strong>အခြေအနေ:</strong> {principle.contexts[activeContext].scenario}
+            </p>
+            <p className="line-clamp-2 leading-relaxed font-medium" style={{ color: contextMeta[activeContext].text }}>
+              <strong>အကြံပြုချက်:</strong> {principle.contexts[activeContext].advice}
+            </p>
           </div>
-          <p className="line-clamp-2 leading-relaxed text-[#5A5245]">
-            {principle.actionStep}
-          </p>
-        </div>
+        ) : (
+          <div className="bg-[#F8F5EE] rounded-xl p-3 border border-[#EBE4D5] text-xs text-[#3E3831] space-y-1">
+            <div className="flex items-center gap-1.5 font-bold text-[#2D5A43]">
+              <CheckCircle2 className="w-3.5 h-3.5" />
+              <span>Action Step (လက်တွေ့ ကျင့်သုံးရန်)</span>
+            </div>
+            <p className="line-clamp-2 leading-relaxed text-[#5A5245]">
+              {principle.actionStep}
+            </p>
+          </div>
+        )}
 
         {/* Context Application Badges */}
         <div className="flex flex-wrap gap-1.5 pt-1">
-          <span className="inline-flex items-center gap-1 text-[10px] font-medium bg-[#E8EFEA] text-[#1E3E2E] px-2 py-0.5 rounded-sm">
+          <span className={`inline-flex items-center gap-1 text-[10px] font-medium px-2 py-0.5 rounded-sm ${activeContext === 'business' ? 'bg-[#2D5A43] text-white font-bold ring-1 ring-[#1E3E2E]' : 'bg-[#E8EFEA] text-[#1E3E2E]'}`}>
             <Briefcase className="w-2.5 h-2.5" /> Business
           </span>
-          <span className="inline-flex items-center gap-1 text-[10px] font-medium bg-[#FBECE7] text-[#8C3A21] px-2 py-0.5 rounded-sm">
+          <span className={`inline-flex items-center gap-1 text-[10px] font-medium px-2 py-0.5 rounded-sm ${activeContext === 'sales' ? 'bg-[#C25E3E] text-white font-bold ring-1 ring-[#8C3A21]' : 'bg-[#FBECE7] text-[#8C3A21]'}`}>
             <ShoppingBag className="w-2.5 h-2.5" /> Sales
           </span>
-          <span className="inline-flex items-center gap-1 text-[10px] font-medium bg-[#E6F0F5] text-[#1C4D6B] px-2 py-0.5 rounded-sm">
+          <span className={`inline-flex items-center gap-1 text-[10px] font-medium px-2 py-0.5 rounded-sm ${activeContext === 'teaching' ? 'bg-[#2C5E7A] text-white font-bold ring-1 ring-[#1C4D6B]' : 'bg-[#E6F0F5] text-[#1C4D6B]'}`}>
             <GraduationCap className="w-2.5 h-2.5" /> Teaching
           </span>
-          <span className="inline-flex items-center gap-1 text-[10px] font-medium bg-[#F3EBF7] text-[#4E2F63] px-2 py-0.5 rounded-sm">
+          <span className={`inline-flex items-center gap-1 text-[10px] font-medium px-2 py-0.5 rounded-sm ${activeContext === 'leadership' ? 'bg-[#6B4C82] text-white font-bold ring-1 ring-[#4E2F63]' : 'bg-[#F3EBF7] text-[#4E2F63]'}`}>
             <Users className="w-2.5 h-2.5" /> Leadership
           </span>
         </div>
@@ -108,7 +146,7 @@ export const LessonCard: React.FC<LessonCardProps> = ({
         <button
           id={`open-detail-btn-${principle.id}`}
           onClick={() => onOpenDetail(principle)}
-          className="w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl bg-[#F4EFE6] hover:bg-[#2D5A43] text-[#2C2926] hover:text-[#FBF9F5] font-semibold text-xs transition-all group/btn"
+          className="w-full flex items-center justify-between px-4 py-3 rounded-xl bg-[#F4EFE6] hover:bg-[#2D5A43] text-[#2C2926] hover:text-[#FBF9F5] font-semibold text-xs sm:text-sm transition-all group/btn min-h-[44px]"
         >
           <span>အသေးစိတ်နှင့် လက်တွေ့ဥပမာများ</span>
           <ArrowRight className="w-3.5 h-3.5 group-hover/btn:translate-x-1 transition-transform" />
@@ -117,3 +155,4 @@ export const LessonCard: React.FC<LessonCardProps> = ({
     </article>
   );
 };
+

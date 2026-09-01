@@ -26,10 +26,10 @@ export const Footer: React.FC<FooterProps> = ({ onSelectPart }) => {
               </div>
               <div>
                 <span className="font-serif-heading font-bold text-lg text-[#FBF9F5]">
-                  မိတ်ဆွေတိုးပွား လူချစ်များနည်း
+                  လူတွေနဲ့ ပိုကောင်းစွာ ဆက်ဆံတတ်ဖို့
                 </span>
                 <p className="text-xs text-[#A89F91]">
-                  How to Win Friends and Influence People (Myanmar Guide)
+                  How to Win Friends and Influence People (Dale Carnegie Guide)
                 </p>
               </div>
             </div>
@@ -118,7 +118,7 @@ export const Footer: React.FC<FooterProps> = ({ onSelectPart }) => {
         {/* Bottom Bar: Copyright and Back to Top */}
         <div className="pt-8 border-t border-[#3A3530] flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-[#A89F91]">
           <div className="flex items-center gap-1.5 text-center sm:text-left">
-            <span>© {new Date().getFullYear()} မိတ်ဆွေတိုးပွား လူချစ်များနည်း လမ်းညွှန်။</span>
+            <span>© {new Date().getFullYear()} လူတွေနဲ့ ပိုကောင်းစွာ ဆက်ဆံတတ်ဖို့ လမ်းညွှန်။</span>
             <span className="hidden sm:inline">•</span>
             <span className="flex items-center gap-1">
               မြန်မာစာဖတ်သူများအတွက် <Heart className="w-3 h-3 text-[#C25E3E] fill-current" /> ဖြင့် ဖန်တီးထားပါသည်။

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Principle } from '../types';
 import { ALL_PRINCIPLES } from '../data/principles';
 import { X, Bookmark, ArrowRight, Trash2 } from 'lucide-react';
@@ -18,6 +18,25 @@ export const BookmarksModal: React.FC<BookmarksModalProps> = ({
   onToggleBookmark,
   onOpenDetail,
 }) => {
+  // Lock body scroll while modal is open & listen for escape
+  useEffect(() => {
+    if (!isOpen) return;
+    const originalStyle = window.getComputedStyle(document.body).overflow;
+    document.body.style.overflow = 'hidden';
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        onClose();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      document.body.style.overflow = originalStyle;
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [isOpen, onClose]);
+
   if (!isOpen) return null;
 
   const bookmarkedPrinciples = ALL_PRINCIPLES.filter((p) =>
@@ -50,7 +69,8 @@ export const BookmarksModal: React.FC<BookmarksModalProps> = ({
           <button
             id="close-bookmarks-modal-btn"
             onClick={onClose}
-            className="p-2 text-[#5A5245] hover:text-[#1E3E2E] hover:bg-[#F2ECE1] rounded-lg transition-colors"
+            aria-label="ပိတ်မည်"
+            className="p-2 text-[#5A5245] hover:text-[#1E3E2E] hover:bg-[#F2ECE1] rounded-lg transition-colors min-h-[40px] min-w-[40px] flex items-center justify-center"
           >
             <X className="w-5 h-5" />
           </button>
@@ -61,7 +81,7 @@ export const BookmarksModal: React.FC<BookmarksModalProps> = ({
           {bookmarkedPrinciples.length === 0 ? (
             <div className="py-12 text-center space-y-2">
               <Bookmark className="w-10 h-10 mx-auto text-[#C5BBAA]" />
-              <p className="text-sm text-[#5A5245]">
+              <p className="text-sm text-[#5A5245] font-medium">
                 မှတ်သားထားသော သဘောတရားများ မရှိသေးပါ။
               </p>
               <p className="text-xs text-[#7A7163]">
@@ -103,15 +123,16 @@ export const BookmarksModal: React.FC<BookmarksModalProps> = ({
                       onClose();
                       onOpenDetail(principle);
                     }}
-                    className="p-2 text-[#2D5A43] hover:bg-[#E8EFEA] rounded-lg transition-colors text-xs font-semibold flex items-center gap-1"
+                    className="p-2 text-[#2D5A43] hover:bg-[#E8EFEA] rounded-lg transition-colors text-xs font-semibold flex items-center gap-1 min-h-[40px]"
                   >
                     <span>ဖတ်ရန်</span>
                     <ArrowRight className="w-3.5 h-3.5" />
                   </button>
                   <button
                     onClick={() => onToggleBookmark(principle.id)}
-                    className="p-2 text-[#B3261E] hover:bg-[#FDF2F0] rounded-lg transition-colors"
+                    className="p-2 text-[#B3261E] hover:bg-[#FDF2F0] rounded-lg transition-colors min-h-[40px] min-w-[40px] flex items-center justify-center"
                     title="ဖျက်ရန်"
+                    aria-label={`သဘောတရား #${principle.id} မှတ်သားမှု ဖျက်မည်`}
                   >
                     <Trash2 className="w-4 h-4" />
                   </button>
@@ -125,3 +146,4 @@ export const BookmarksModal: React.FC<BookmarksModalProps> = ({
     </div>
   );
 };
+

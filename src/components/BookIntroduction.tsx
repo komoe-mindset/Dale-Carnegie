@@ -32,7 +32,7 @@ export const BookIntroduction: React.FC = () => {
             <span>မူရင်းစာအုပ်နှင့် သဘောတရား</span>
           </div>
           <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-[#1E3E2E] font-serif-heading">
-            “မိတ်ဆွေတိုးပွား လူချစ်များနည်း” စာအုပ်အကြောင်း
+            “လူတွေနဲ့ ပိုကောင်းစွာ ဆက်ဆံတတ်ဖို့” စာအုပ်အကြောင်း
           </h2>
           <p className="text-sm sm:text-base text-[#5A5245] leading-relaxed">
             Dale Carnegie ၏ ၁၉၃၆ ခုနှစ်ထုတ် ကမ္ဘာကျော် လူမှုဆက်ဆံရေး လက်စွဲကျမ်းသည် နှစ်ပေါင်း ၉၀ နီးပါးတိုင်အောင်
