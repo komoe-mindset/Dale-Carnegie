@@ -90,18 +90,18 @@ export const LessonCard: React.FC<LessonCardProps> = ({
         {/* Dynamic Context Perspective Box OR Action Step */}
         {activeContext !== 'all' ? (
           <div
-            className="rounded-xl p-3.5 border space-y-1.5 transition-all text-xs"
+            className="rounded-xl p-3.5 border space-y-2 transition-all text-xs"
             style={{
               backgroundColor: contextMeta[activeContext].bg,
               borderColor: contextMeta[activeContext].border,
             }}
           >
-            <div className="flex items-center justify-between">
+            <div className="flex flex-wrap items-center justify-between gap-1">
               <div className="flex items-center gap-1.5 font-bold" style={{ color: contextMeta[activeContext].text }}>
                 {React.createElement(contextMeta[activeContext].icon, { className: 'w-3.5 h-3.5' })}
-                <span>{contextMeta[activeContext].label} လက်တွေ့ ရှုထောင့်</span>
+                <span>{contextMeta[activeContext].label} ရှုထောင့်</span>
               </div>
-              <span className="text-[10px] font-semibold opacity-90 px-1.5 py-0.5 rounded bg-white/70">
+              <span className="text-xs font-semibold px-2 py-0.5 rounded bg-white/80 border border-black/5">
                 {principle.contexts[activeContext].keyTakeaway}
               </span>
             </div>
@@ -116,7 +116,7 @@ export const LessonCard: React.FC<LessonCardProps> = ({
           <div className="bg-[#F8F5EE] rounded-xl p-3 border border-[#EBE4D5] text-xs text-[#3E3831] space-y-1">
             <div className="flex items-center gap-1.5 font-bold text-[#2D5A43]">
               <CheckCircle2 className="w-3.5 h-3.5" />
-              <span>Action Step (လက်တွေ့ ကျင့်သုံးရန်)</span>
+              <span>Action Step (ဒီနေ့ စတင်လုပ်ရန်)</span>
             </div>
             <p className="line-clamp-2 leading-relaxed text-[#5A5245]">
               {principle.actionStep}
@@ -126,17 +126,17 @@ export const LessonCard: React.FC<LessonCardProps> = ({
 
         {/* Context Application Badges */}
         <div className="flex flex-wrap gap-1.5 pt-1">
-          <span className={`inline-flex items-center gap-1 text-[10px] font-medium px-2 py-0.5 rounded-sm ${activeContext === 'business' ? 'bg-[#2D5A43] text-white font-bold ring-1 ring-[#1E3E2E]' : 'bg-[#E8EFEA] text-[#1E3E2E]'}`}>
-            <Briefcase className="w-2.5 h-2.5" /> Business
+          <span className={`inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-md ${activeContext === 'business' ? 'bg-[#2D5A43] text-white font-bold ring-1 ring-[#1E3E2E]' : 'bg-[#E8EFEA] text-[#1E3E2E]'}`}>
+            <Briefcase className="w-3 h-3" /> Business
           </span>
-          <span className={`inline-flex items-center gap-1 text-[10px] font-medium px-2 py-0.5 rounded-sm ${activeContext === 'sales' ? 'bg-[#C25E3E] text-white font-bold ring-1 ring-[#8C3A21]' : 'bg-[#FBECE7] text-[#8C3A21]'}`}>
-            <ShoppingBag className="w-2.5 h-2.5" /> Sales
+          <span className={`inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-md ${activeContext === 'sales' ? 'bg-[#C25E3E] text-white font-bold ring-1 ring-[#8C3A21]' : 'bg-[#FBECE7] text-[#8C3A21]'}`}>
+            <ShoppingBag className="w-3 h-3" /> Sales
           </span>
-          <span className={`inline-flex items-center gap-1 text-[10px] font-medium px-2 py-0.5 rounded-sm ${activeContext === 'teaching' ? 'bg-[#2C5E7A] text-white font-bold ring-1 ring-[#1C4D6B]' : 'bg-[#E6F0F5] text-[#1C4D6B]'}`}>
-            <GraduationCap className="w-2.5 h-2.5" /> Teaching
+          <span className={`inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-md ${activeContext === 'teaching' ? 'bg-[#2C5E7A] text-white font-bold ring-1 ring-[#1C4D6B]' : 'bg-[#E6F0F5] text-[#1C4D6B]'}`}>
+            <GraduationCap className="w-3 h-3" /> Teaching
           </span>
-          <span className={`inline-flex items-center gap-1 text-[10px] font-medium px-2 py-0.5 rounded-sm ${activeContext === 'leadership' ? 'bg-[#6B4C82] text-white font-bold ring-1 ring-[#4E2F63]' : 'bg-[#F3EBF7] text-[#4E2F63]'}`}>
-            <Users className="w-2.5 h-2.5" /> Leadership
+          <span className={`inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-md ${activeContext === 'leadership' ? 'bg-[#6B4C82] text-white font-bold ring-1 ring-[#4E2F63]' : 'bg-[#F3EBF7] text-[#4E2F63]'}`}>
+            <Users className="w-3 h-3" /> Leadership
           </span>
         </div>
       </div>

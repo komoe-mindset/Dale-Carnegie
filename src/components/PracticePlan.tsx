@@ -27,7 +27,19 @@ export const PracticePlan: React.FC<PracticePlanProps> = ({
   onOpenDetail,
 }) => {
   const [filterMode, setFilterMode] = useState<'all' | 'completed' | 'incomplete'>('all');
-  const [selectedWeek, setSelectedWeek] = useState<number | 'all'>('all');
+  const [selectedWeek, setSelectedWeek] = useState<number | 'all'>(() => {
+    // Find first incomplete day
+    for (let day = 1; day <= 30; day++) {
+      if (!progress.completedDays.includes(day)) {
+        if (day <= 7) return 1;
+        if (day <= 14) return 2;
+        if (day <= 21) return 3;
+        if (day <= 28) return 4;
+        return 5;
+      }
+    }
+    return 'all';
+  });
   const [showResetConfirm, setShowResetConfirm] = useState<'practice' | 'all' | null>(null);
 
   const completedCount = progress.completedDays.length;
@@ -58,7 +70,6 @@ export const PracticePlan: React.FC<PracticePlanProps> = ({
   return (
     <section id="practice-plan" className="py-16 sm:py-20 bg-[#F5EFE4] border-b border-[#E8E0D2]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        
         {/* Section Header */}
         <div className="text-center max-w-3xl mx-auto mb-10 sm:mb-12 space-y-3">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#EAE0CF] text-[#4A4036] text-xs font-semibold">
@@ -76,7 +87,6 @@ export const PracticePlan: React.FC<PracticePlanProps> = ({
         {/* Progress Dashboard Banner */}
         <div className="bg-[#FFFDF9] rounded-2xl p-6 sm:p-8 border border-[#E2D8C7] shadow-xs mb-8">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-            
             {/* Stats Info */}
             <div className="space-y-2">
               <div className="flex items-center gap-2">
@@ -104,24 +114,23 @@ export const PracticePlan: React.FC<PracticePlanProps> = ({
               <button
                 id="reset-practice-days-btn"
                 onClick={() => setShowResetConfirm('practice')}
-                className="inline-flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-[#F5EFE4] hover:bg-[#EAE0CF] text-[#6B6357] hover:text-[#B3261E] text-xs font-semibold border border-[#DDD3BF] transition-colors min-h-[40px]"
+                className="inline-flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-[#F5EFE4] hover:bg-[#EAE0CF] text-[#6B6357] hover:text-[#B3261E] text-xs font-semibold border border-[#DDD3BF] transition-colors min-h-[44px]"
                 title="၃၀ ရက် လေ့ကျင့်မှု မှတ်တမ်းများကိုသာ အစမှ ပြန်လည်စတင်ရန်"
               >
                 <RotateCcw className="w-3.5 h-3.5" />
-                <span>Reset 30-Day Practice</span>
+                <span>၃၀ ရက် လေ့ကျင့်မှုကို အစမှပြန်စမယ်</span>
               </button>
 
               <button
                 id="clear-all-app-data-btn"
                 onClick={() => setShowResetConfirm('all')}
-                className="inline-flex items-center gap-1.5 px-3 py-2.5 rounded-xl bg-[#FDF2F0] hover:bg-[#FBE4E1] text-[#B3261E] text-xs font-semibold border border-[#F5C7C2] transition-colors min-h-[40px]"
+                className="inline-flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-[#FDF2F0] hover:bg-[#FBE4E1] text-[#B3261E] text-xs font-semibold border border-[#F5C7C2] transition-colors min-h-[44px]"
                 title="မှတ်စုများနှင့် Bookmark များအပါအဝင် အားလုံး ရှင်းလင်းရန်"
               >
                 <Trash2 className="w-3.5 h-3.5" />
-                <span>Clear All Data</span>
+                <span>သိမ်းထားတာအားလုံး ဖျက်မယ်</span>
               </button>
             </div>
-
           </div>
 
           {/* Visual Progress Bar with WAI-ARIA */}
@@ -149,7 +158,6 @@ export const PracticePlan: React.FC<PracticePlanProps> = ({
 
         {/* Filter Controls: Week Selector & Status Tabs */}
         <div className="bg-[#FFFDF9] rounded-2xl p-4 sm:p-5 border border-[#E2D8C7] mb-6 space-y-4 shadow-xs">
-          
           {/* Week Groups */}
           <div className="space-y-2">
             <label className="text-xs font-bold text-[#6B6357] uppercase tracking-wider block">
@@ -159,75 +167,79 @@ export const PracticePlan: React.FC<PracticePlanProps> = ({
               <button
                 id="week-filter-all"
                 onClick={() => setSelectedWeek('all')}
-                className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all min-h-[36px] ${
+                className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all min-h-[40px] ${
                   selectedWeek === 'all'
                     ? 'bg-[#2D5A43] text-white shadow-xs'
                     : 'bg-[#F5EFE4] text-[#5A5245] hover:bg-[#EAE0CF]'
                 }`}
               >
-                ရက် ၃၀ လုံး (All)
+                ရက် ၃၀ လုံး (အားလုံး)
               </button>
               <button
                 id="week-filter-1"
                 onClick={() => setSelectedWeek(1)}
-                className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all min-h-[36px] ${
+                className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all min-h-[40px] ${
                   selectedWeek === 1
                     ? 'bg-[#2D5A43] text-white shadow-xs'
                     : 'bg-[#F5EFE4] text-[#5A5245] hover:bg-[#EAE0CF]'
                 }`}
               >
-                Week 1 (Day 1-7)
+                ပထမပတ် — ရက် ၁ မှ ၇
               </button>
               <button
                 id="week-filter-2"
                 onClick={() => setSelectedWeek(2)}
-                className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all min-h-[36px] ${
+                className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all min-h-[40px] ${
                   selectedWeek === 2
                     ? 'bg-[#2D5A43] text-white shadow-xs'
                     : 'bg-[#F5EFE4] text-[#5A5245] hover:bg-[#EAE0CF]'
                 }`}
               >
-                Week 2 (Day 8-14)
+                ဒုတိယပတ် — ရက် ၈ မှ ၁၄
               </button>
               <button
                 id="week-filter-3"
                 onClick={() => setSelectedWeek(3)}
-                className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all min-h-[36px] ${
+                className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all min-h-[40px] ${
                   selectedWeek === 3
                     ? 'bg-[#2D5A43] text-white shadow-xs'
                     : 'bg-[#F5EFE4] text-[#5A5245] hover:bg-[#EAE0CF]'
                 }`}
               >
-                Week 3 (Day 15-21)
+                တတိယပတ် — ရက် ၁၅ မှ ၂၁
               </button>
               <button
                 id="week-filter-4"
                 onClick={() => setSelectedWeek(4)}
-                className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all min-h-[36px] ${
+                className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all min-h-[40px] ${
                   selectedWeek === 4
                     ? 'bg-[#2D5A43] text-white shadow-xs'
                     : 'bg-[#F5EFE4] text-[#5A5245] hover:bg-[#EAE0CF]'
                 }`}
               >
-                Week 4 (Day 22-28)
+                စတုတ္ထပတ် — ရက် ၂၂ မှ ၂၈
               </button>
               <button
                 id="week-filter-5"
                 onClick={() => setSelectedWeek(5)}
-                className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all min-h-[36px] ${
+                className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all min-h-[40px] ${
                   selectedWeek === 5
                     ? 'bg-[#2D5A43] text-white shadow-xs'
                     : 'bg-[#F5EFE4] text-[#5A5245] hover:bg-[#EAE0CF]'
                 }`}
               >
-                Final (Day 29-30)
+                နောက်ဆုံးလေ့ကျင့်မှု — ရက် ၂၉ နှင့် ၃၀
               </button>
             </div>
           </div>
 
           {/* Status Tabs: All, Completed, Incomplete */}
           <div className="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-[#F0EAE1]">
-            <div className="inline-flex p-1 rounded-xl bg-[#EAE0CF] border border-[#DDD3BF]" role="tablist" aria-label="ပြီးစီးမှု အခြေအနေ စစ်ထုတ်မှု">
+            <div
+              className="inline-flex p-1 rounded-xl bg-[#EAE0CF] border border-[#DDD3BF]"
+              role="tablist"
+              aria-label="ပြီးစီးမှု အခြေအနေ စစ်ထုတ်မှု"
+            >
               <button
                 id="practice-filter-all"
                 role="tab"
@@ -252,7 +264,7 @@ export const PracticePlan: React.FC<PracticePlanProps> = ({
                     : 'text-[#5A5245] hover:text-[#1E3E2E]'
                 }`}
               >
-                ပြီးစီးပြီး ({completedCount})
+                ပြီးထားတာ ({completedCount})
               </button>
               <button
                 id="practice-filter-incomplete"
@@ -265,7 +277,7 @@ export const PracticePlan: React.FC<PracticePlanProps> = ({
                     : 'text-[#5A5245] hover:text-[#1E3E2E]'
                 }`}
               >
-                မပြီးသေး ({30 - completedCount})
+                မပြီးသေးတာ ({30 - completedCount})
               </button>
             </div>
 
@@ -273,7 +285,6 @@ export const PracticePlan: React.FC<PracticePlanProps> = ({
               ပြသထားသော အရေအတွက်: <strong>{filteredDays.length}</strong> ရက်
             </span>
           </div>
-
         </div>
 
         {/* 30-Day Cards Grid */}
@@ -287,9 +298,7 @@ export const PracticePlan: React.FC<PracticePlanProps> = ({
                 key={principle.id}
                 id={`practice-card-day-${dayNum}`}
                 className={`bg-[#FFFDF9] rounded-2xl p-5 sm:p-6 border transition-all flex flex-col justify-between hover:shadow-md ${
-                  isCompleted
-                    ? 'border-[#2D5A43]/50 bg-[#FAFDFC]'
-                    : 'border-[#E2D8C7]'
+                  isCompleted ? 'border-[#2D5A43]/50 bg-[#FAFDFC]' : 'border-[#E2D8C7]'
                 }`}
               >
                 <div className="space-y-3.5">
@@ -302,7 +311,9 @@ export const PracticePlan: React.FC<PracticePlanProps> = ({
                     <button
                       id={`toggle-day-${dayNum}-btn`}
                       onClick={() => onToggleCompleted(dayNum)}
-                      aria-label={`Day ${dayNum} အလေ့အကျင့် ${isCompleted ? 'မပြီးသေးပါသို့ ပြောင်းမည်' : 'ပြီးစီးပါပြီဟု မှတ်သားမည်'}`}
+                      aria-label={`Day ${dayNum} အလေ့အကျင့် ${
+                        isCompleted ? 'မပြီးသေးပါသို့ ပြောင်းမည်' : 'ပြီးစီးပါပြီဟု မှတ်သားမည်'
+                      }`}
                       className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold transition-colors border min-h-[36px] ${
                         isCompleted
                           ? 'bg-[#2D5A43] text-white border-[#2D5A43]'
@@ -325,9 +336,9 @@ export const PracticePlan: React.FC<PracticePlanProps> = ({
                   </div>
 
                   {/* Practical Activity */}
-                  <div className="bg-[#F8F5EE] rounded-xl p-3.5 border border-[#EBE4D5] space-y-1 text-xs">
+                  <div className="bg-[#F8F5EE] rounded-xl p-3.5 border border-[#EBE4D5] space-y-1 text-xs sm:text-sm">
                     <p className="font-bold text-[#2D5A43] flex items-center gap-1">
-                      <Sparkles className="w-3 h-3" />
+                      <Sparkles className="w-3.5 h-3.5" />
                       <span>လက်တွေ့ လုပ်ဆောင်ရမည့် အလေ့အကျင့်:</span>
                     </p>
                     <p className="text-[#3E3831] leading-relaxed">
@@ -336,7 +347,7 @@ export const PracticePlan: React.FC<PracticePlanProps> = ({
                   </div>
 
                   {/* Reflection Question */}
-                  <div className="text-xs text-[#5A5245] space-y-0.5">
+                  <div className="text-xs sm:text-sm text-[#5A5245] space-y-0.5">
                     <p className="font-semibold text-[#C25E3E]">ကိုယ်တိုင် ပြန်လည်ဆင်ခြင်ရန်:</p>
                     <p className="italic text-[#4A4036] leading-relaxed">
                       "{principle.dayPractice.reflectionPrompt}"
@@ -355,7 +366,7 @@ export const PracticePlan: React.FC<PracticePlanProps> = ({
                     <ArrowRight className="w-3.5 h-3.5" />
                   </button>
 
-                  <span className="text-[11px] text-[#8A8174]">
+                  <span className="text-xs text-[#8A8174]">
                     {principle.dayPractice.habitTip}
                   </span>
                 </div>
@@ -378,7 +389,10 @@ export const PracticePlan: React.FC<PracticePlanProps> = ({
               </div>
 
               <div className="text-center space-y-1.5">
-                <h3 id="reset-confirm-modal-title" className="font-serif-heading font-bold text-lg text-[#1E3E2E]">
+                <h3
+                  id="reset-confirm-modal-title"
+                  className="font-serif-heading font-bold text-lg text-[#1E3E2E]"
+                >
                   {showResetConfirm === 'practice'
                     ? '၃၀ ရက် လေ့ကျင့်မှု မှတ်တမ်းများကိုသာ ပြန်စမည်လား'
                     : 'အချက်အလက်အားလုံး (မှတ်စု၊ Bookmark များအပါ) ဖျက်မည်လား'}
@@ -416,7 +430,6 @@ export const PracticePlan: React.FC<PracticePlanProps> = ({
             </div>
           </div>
         )}
-
       </div>
     </section>
   );

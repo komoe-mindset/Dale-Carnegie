@@ -232,6 +232,7 @@ export function App() {
         isOpen={isBookmarksOpen}
         onClose={() => setIsBookmarksOpen(false)}
         bookmarkedIds={progress.bookmarkedPrinciples}
+        reflections={progress.reflections}
         onToggleBookmark={handleToggleBookmark}
         onOpenDetail={(principle) => setActivePrincipleModal(principle)}
       />

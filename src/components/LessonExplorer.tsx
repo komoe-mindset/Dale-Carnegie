@@ -2,7 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { Principle, ContextKey, UserProgress } from '../types';
 import { ALL_PRINCIPLES } from '../data/principles';
 import { LessonCard } from './LessonCard';
-import { Search, Filter, BookOpen, X, Sparkles, Layers } from 'lucide-react';
+import { Search, BookOpen, X, Sparkles, ChevronDown, Check } from 'lucide-react';
 
 interface LessonExplorerProps {
   onOpenDetail: (principle: Principle) => void;
@@ -24,6 +24,14 @@ export const LessonExplorer: React.FC<LessonExplorerProps> = ({
   onSelectContext,
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
+  const [visibleCount, setVisibleCount] = useState<number>(9);
+
+  const contextNames: Record<ContextKey, string> = {
+    business: 'Business (လုပ်ငန်းခွင်)',
+    sales: 'Sales (အရောင်းနှင့် ဝန်ဆောင်မှု)',
+    teaching: 'Teaching (သင်ကြားရေး)',
+    leadership: 'Leadership (ခေါင်းဆောင်မှု)',
+  };
 
   const filteredPrinciples = useMemo(() => {
     return ALL_PRINCIPLES.filter((principle) => {
@@ -32,43 +40,53 @@ export const LessonExplorer: React.FC<LessonExplorerProps> = ({
         return false;
       }
 
-      // Filter by Search Query (Title, keywords, english title, meaning, contexts)
+      // Filter by Search Query (Title, keywords, english title, meaning, whyImportant, contexts)
       if (searchQuery.trim() !== '') {
         const query = searchQuery.toLowerCase().trim();
         const titleMatch = principle.title.toLowerCase().includes(query);
         const englishMatch = principle.englishTitle.toLowerCase().includes(query);
         const meaningMatch = principle.coreMeaning.toLowerCase().includes(query);
+        const whyImportantMatch = principle.whyImportant.toLowerCase().includes(query);
         const taglineMatch = principle.tagline.toLowerCase().includes(query);
         const actionMatch = principle.actionStep.toLowerCase().includes(query);
         const exampleMatch = principle.realLifeExample.toLowerCase().includes(query);
-        const badMatch = principle.whatNotToDo.description.toLowerCase().includes(query) ||
-                         principle.whatNotToDo.badDialogue.toLowerCase().includes(query);
-        const betterMatch = principle.whatToDo.description.toLowerCase().includes(query) ||
-                            principle.whatToDo.goodDialogue.toLowerCase().includes(query);
+        const badMatch =
+          principle.whatNotToDo.description.toLowerCase().includes(query) ||
+          principle.whatNotToDo.badDialogue.toLowerCase().includes(query);
+        const betterMatch =
+          principle.whatToDo.description.toLowerCase().includes(query) ||
+          principle.whatToDo.goodDialogue.toLowerCase().includes(query);
         const reflectionMatch = principle.reflectionQuestion.toLowerCase().includes(query);
-        const habitMatch = principle.dayPractice.activity.toLowerCase().includes(query) ||
-                           principle.dayPractice.reflectionPrompt.toLowerCase().includes(query) ||
-                           principle.dayPractice.habitTip.toLowerCase().includes(query);
-        const idMatch = principle.id.toString() === query || `day ${principle.dayPractice.day}`.includes(query);
+        const habitMatch =
+          principle.dayPractice.activity.toLowerCase().includes(query) ||
+          principle.dayPractice.reflectionPrompt.toLowerCase().includes(query) ||
+          principle.dayPractice.habitTip.toLowerCase().includes(query);
+        const idMatch =
+          principle.id.toString() === query || `day ${principle.dayPractice.day}`.includes(query);
 
         // check context content
-        const businessMatch = principle.contexts.business.scenario.toLowerCase().includes(query) ||
-                              principle.contexts.business.advice.toLowerCase().includes(query) ||
-                              principle.contexts.business.keyTakeaway.toLowerCase().includes(query);
-        const salesMatch = principle.contexts.sales.scenario.toLowerCase().includes(query) ||
-                           principle.contexts.sales.advice.toLowerCase().includes(query) ||
-                           principle.contexts.sales.keyTakeaway.toLowerCase().includes(query);
-        const teachingMatch = principle.contexts.teaching.scenario.toLowerCase().includes(query) ||
-                              principle.contexts.teaching.advice.toLowerCase().includes(query) ||
-                              principle.contexts.teaching.keyTakeaway.toLowerCase().includes(query);
-        const leadershipMatch = principle.contexts.leadership.scenario.toLowerCase().includes(query) ||
-                                principle.contexts.leadership.advice.toLowerCase().includes(query) ||
-                                principle.contexts.leadership.keyTakeaway.toLowerCase().includes(query);
+        const businessMatch =
+          principle.contexts.business.scenario.toLowerCase().includes(query) ||
+          principle.contexts.business.advice.toLowerCase().includes(query) ||
+          principle.contexts.business.keyTakeaway.toLowerCase().includes(query);
+        const salesMatch =
+          principle.contexts.sales.scenario.toLowerCase().includes(query) ||
+          principle.contexts.sales.advice.toLowerCase().includes(query) ||
+          principle.contexts.sales.keyTakeaway.toLowerCase().includes(query);
+        const teachingMatch =
+          principle.contexts.teaching.scenario.toLowerCase().includes(query) ||
+          principle.contexts.teaching.advice.toLowerCase().includes(query) ||
+          principle.contexts.teaching.keyTakeaway.toLowerCase().includes(query);
+        const leadershipMatch =
+          principle.contexts.leadership.scenario.toLowerCase().includes(query) ||
+          principle.contexts.leadership.advice.toLowerCase().includes(query) ||
+          principle.contexts.leadership.keyTakeaway.toLowerCase().includes(query);
 
         return (
           titleMatch ||
           englishMatch ||
           meaningMatch ||
+          whyImportantMatch ||
           taglineMatch ||
           actionMatch ||
           exampleMatch ||
@@ -88,16 +106,33 @@ export const LessonExplorer: React.FC<LessonExplorerProps> = ({
     });
   }, [selectedPartId, searchQuery]);
 
+  // Determine displayed principles based on pagination
+  const displayedPrinciples = useMemo(() => {
+    // If user is searching or has selected a specific part, show all matching
+    if (searchQuery.trim() !== '' || selectedPartId !== null) {
+      return filteredPrinciples;
+    }
+    return filteredPrinciples.slice(0, visibleCount);
+  }, [filteredPrinciples, searchQuery, selectedPartId, visibleCount]);
+
   const clearAllFilters = () => {
     setSearchQuery('');
     onSelectContext('all');
     onSelectPartId(null);
+    setVisibleCount(9);
+  };
+
+  const handleShowMore = () => {
+    setVisibleCount((prev) => Math.min(prev + 9, ALL_PRINCIPLES.length));
+  };
+
+  const handleShowAll = () => {
+    setVisibleCount(ALL_PRINCIPLES.length);
   };
 
   return (
     <section id="lessons" className="py-16 sm:py-20 bg-[#FBF9F5] border-b border-[#EFE9DD]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        
         {/* Section Header */}
         <div className="text-center max-w-3xl mx-auto mb-10 sm:mb-12 space-y-3">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#EAE2D2] text-[#4A4036] text-xs font-semibold">
@@ -114,7 +149,6 @@ export const LessonExplorer: React.FC<LessonExplorerProps> = ({
 
         {/* Search & Filter Controls Container */}
         <div className="bg-[#FFFDF9] rounded-2xl p-4 sm:p-6 border border-[#E2D8C7] shadow-xs mb-8 space-y-4">
-          
           {/* Search Input */}
           <div className="relative">
             <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-[#8A8174]">
@@ -133,7 +167,7 @@ export const LessonExplorer: React.FC<LessonExplorerProps> = ({
                 id="clear-search-btn"
                 onClick={() => setSearchQuery('')}
                 className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-[#8A8174] hover:text-[#2C2926]"
-                aria-label="Clear search text"
+                aria-label="ရှာဖွေထားသော စာသားကို ရှင်းမည်"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -142,12 +176,9 @@ export const LessonExplorer: React.FC<LessonExplorerProps> = ({
 
           {/* Filter Pills */}
           <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pt-2 border-t border-[#F0EAE1]">
-            
             {/* Part Filters */}
             <div className="flex items-center gap-1.5 overflow-x-auto pb-1.5 lg:pb-0 scrollbar-thin">
-              <span className="text-xs font-bold text-[#6B6357] shrink-0 mr-1">
-                အပိုင်းများ:
-              </span>
+              <span className="text-xs font-bold text-[#6B6357] shrink-0 mr-1">အပိုင်းများ:</span>
               <button
                 id="filter-part-all"
                 onClick={() => onSelectPartId(null)}
@@ -206,10 +237,12 @@ export const LessonExplorer: React.FC<LessonExplorerProps> = ({
             </div>
 
             {/* Context Filters */}
-            <div className="flex items-center gap-1.5 overflow-x-auto pb-1 lg:pb-0" role="tablist" aria-label="လက်တွေ့နယ်ပယ် ရှုထောင့် ရွေးချယ်မှု">
-              <span className="text-xs font-bold text-[#6B6357] shrink-0 mr-1">
-                နယ်ပယ်:
-              </span>
+            <div
+              className="flex items-center gap-1.5 overflow-x-auto pb-1 lg:pb-0"
+              role="tablist"
+              aria-label="လက်တွေ့နယ်ပယ် ရှုထောင့် ရွေးချယ်မှု"
+            >
+              <span className="text-xs font-bold text-[#6B6357] shrink-0 mr-1">နယ်ပယ်:</span>
               {(
                 [
                   { key: 'all', label: 'အားလုံး' },
@@ -235,13 +268,32 @@ export const LessonExplorer: React.FC<LessonExplorerProps> = ({
                 </button>
               ))}
             </div>
-
           </div>
+
+          {/* Active Context Banner if not 'all' */}
+          {selectedContext !== 'all' && (
+            <div className="bg-[#E8EFEA] border border-[#C5D9CB] rounded-xl p-3 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 text-xs">
+              <div className="flex items-center gap-2 text-[#1E3E2E] font-medium">
+                <Sparkles className="w-4 h-4 text-[#2D5A43] shrink-0" />
+                <span>
+                  အခု သင်ခန်းစာ ၃၀ လုံးကို <strong>{contextNames[selectedContext]}</strong>{' '}
+                  ရှုထောင့်ကနေ ပြထားပါတယ်။
+                </span>
+              </div>
+              <button
+                onClick={() => onSelectContext('all')}
+                className="text-xs font-bold text-[#2D5A43] hover:underline shrink-0"
+              >
+                မူလရှုထောင့် (အားလုံး) သို့ ပြန်ပြောင်းမည်
+              </button>
+            </div>
+          )}
 
           {/* Results Summary Count */}
           <div className="flex items-center justify-between text-xs text-[#6B6357] pt-1">
             <span>
-              ရလဒ် စုစုပေါင်း <strong>{filteredPrinciples.length}</strong> ခု တွေ့ရှိပါသည်
+              သင်ခန်းစာ <strong>{displayedPrinciples.length}</strong> /{' '}
+              <strong>{filteredPrinciples.length}</strong> ခု ကို ပြထားပါသည်
             </span>
             {(selectedPartId !== null || selectedContext !== 'all' || searchQuery !== '') && (
               <button
@@ -253,7 +305,6 @@ export const LessonExplorer: React.FC<LessonExplorerProps> = ({
               </button>
             )}
           </div>
-
         </div>
 
         {/* Empty State when no lessons found */}
@@ -267,7 +318,8 @@ export const LessonExplorer: React.FC<LessonExplorerProps> = ({
                 ကိုက်ညီသော သဘောတရား မတွေ့ရှိပါ
               </h3>
               <p className="text-xs sm:text-sm text-[#6B6357] leading-relaxed">
-                "{searchQuery}" နှင့် ပတ်သက်သော သင်ခန်းစာ မတွေ့ပါ။ အခြား စကားလုံးဖြင့် ရှာဖွေပါ သို့မဟုတ် Filter များကို ပြန်လည်ရှင်းလင်းပါ။
+                "{searchQuery}" နှင့် ပတ်သက်သော သင်ခန်းစာ မတွေ့ပါ။ အခြား စကားလုံးဖြင့် ရှာဖွေပါ
+                သို့မဟုတ် Filter များကို ပြန်လည်ရှင်းလင်းပါ။
               </p>
             </div>
             <button
@@ -279,27 +331,52 @@ export const LessonExplorer: React.FC<LessonExplorerProps> = ({
             </button>
           </div>
         ) : (
-          /* Principles Grid */
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredPrinciples.map((principle) => {
-              const isCompleted = progress.completedDays.includes(principle.dayPractice.day);
-              const isBookmarked = progress.bookmarkedPrinciples.includes(principle.id);
+          /* Principles Grid & Pagination */
+          <div className="space-y-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {displayedPrinciples.map((principle) => {
+                const isCompleted = progress.completedDays.includes(principle.dayPractice.day);
+                const isBookmarked = progress.bookmarkedPrinciples.includes(principle.id);
 
-              return (
-                <LessonCard
-                  key={principle.id}
-                  principle={principle}
-                  isBookmarked={isBookmarked}
-                  onToggleBookmark={onToggleBookmark}
-                  onOpenDetail={onOpenDetail}
-                  isCompleted={isCompleted}
-                  activeContext={selectedContext}
-                />
-              );
-            })}
+                return (
+                  <LessonCard
+                    key={principle.id}
+                    principle={principle}
+                    isBookmarked={isBookmarked}
+                    onToggleBookmark={onToggleBookmark}
+                    onOpenDetail={onOpenDetail}
+                    isCompleted={isCompleted}
+                    activeContext={selectedContext}
+                  />
+                );
+              })}
+            </div>
+
+            {/* Pagination Controls when limited */}
+            {searchQuery.trim() === '' &&
+              selectedPartId === null &&
+              visibleCount < filteredPrinciples.length && (
+                <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-4">
+                  <button
+                    id="show-more-lessons-btn"
+                    onClick={handleShowMore}
+                    className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-[#2D5A43] hover:bg-[#234735] text-white font-semibold text-sm shadow-xs transition-colors min-h-[44px] w-full sm:w-auto"
+                  >
+                    <span>နောက်ထပ် သင်ခန်းစာများ ပြမယ်</span>
+                    <ChevronDown className="w-4 h-4" />
+                  </button>
+
+                  <button
+                    id="show-all-lessons-btn"
+                    onClick={handleShowAll}
+                    className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-[#F0EAE1] hover:bg-[#E5DDCF] text-[#2C2926] font-semibold text-sm border border-[#D5CBB9] transition-colors min-h-[44px] w-full sm:w-auto"
+                  >
+                    <span>သင်ခန်းစာ (၃၀) လုံး တစ်ပြိုင်နက် ပြမယ်</span>
+                  </button>
+                </div>
+              )}
           </div>
         )}
-
       </div>
     </section>
   );

@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Principle, ContextKey } from '../types';
+import { useModalFocus } from '../hooks/useModalFocus';
 import {
   X,
   Bookmark,
@@ -58,14 +59,10 @@ export const LessonDetailModal: React.FC<LessonDetailModalProps> = ({
   const [isSavedToast, setIsSavedToast] = useState(false);
   const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Lock body scroll while modal is open
-  useEffect(() => {
-    const originalStyle = window.getComputedStyle(document.body).overflow;
-    document.body.style.overflow = 'hidden';
-    return () => {
-      document.body.style.overflow = originalStyle;
-    };
-  }, []);
+  const modalRef = useModalFocus({
+    isOpen: !!principle,
+    onClose,
+  });
 
   useEffect(() => {
     if (principle) {
@@ -89,24 +86,26 @@ export const LessonDetailModal: React.FC<LessonDetailModalProps> = ({
     }
   };
 
-  // Keyboard navigation & escape listener
+  // Keyboard navigation for arrow keys (Escape handled by useModalFocus)
   useEffect(() => {
+    if (!principle) return;
+
     const handleKeyDown = (e: KeyboardEvent) => {
       const activeTag = (document.activeElement?.tagName || '').toLowerCase();
       const isInputActive = activeTag === 'input' || activeTag === 'textarea';
 
-      if (e.key === 'Escape') {
-        onClose();
-      } else if (!isInputActive && e.key === 'ArrowLeft' && hasPrev) {
-        onNavigate('prev');
-      } else if (!isInputActive && e.key === 'ArrowRight' && hasNext) {
-        onNavigate('next');
+      if (!isInputActive) {
+        if (e.key === 'ArrowLeft' && hasPrev) {
+          onNavigate('prev');
+        } else if (e.key === 'ArrowRight' && hasNext) {
+          onNavigate('next');
+        }
       }
     };
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [onClose, onNavigate, hasPrev, hasNext]);
+  }, [principle, onNavigate, hasPrev, hasNext]);
 
   if (!principle) return null;
 
@@ -130,8 +129,10 @@ export const LessonDetailModal: React.FC<LessonDetailModalProps> = ({
       aria-labelledby="lesson-modal-title"
     >
       {/* Modal Container */}
-      <div className="relative bg-[#FBF9F5] w-full max-w-4xl rounded-2xl sm:rounded-3xl shadow-2xl border border-[#E2D8C7] overflow-hidden flex flex-col max-h-[92vh] animate-fadeIn">
-        
+      <div
+        ref={modalRef}
+        className="relative bg-[#FBF9F5] w-full max-w-4xl rounded-2xl sm:rounded-3xl shadow-2xl border border-[#E2D8C7] overflow-hidden flex flex-col max-h-[92vh] animate-fadeIn"
+      >
         {/* Modal Top Sticky Bar */}
         <div className="sticky top-0 z-20 bg-[#FBF9F5]/95 backdrop-blur-md px-5 py-4 sm:px-8 border-b border-[#EAE2D2] flex items-center justify-between gap-4">
           <div className="flex items-center gap-2 sm:gap-3">
@@ -139,7 +140,7 @@ export const LessonDetailModal: React.FC<LessonDetailModalProps> = ({
               #{principle.id}
             </span>
             <div>
-              <span className="text-[11px] font-bold text-[#C25E3E] uppercase tracking-wider">
+              <span className="text-xs font-bold text-[#C25E3E] uppercase tracking-wider">
                 Part {principle.partId} • {principle.partTitle}
               </span>
               <p className="text-xs text-[#7A7163] hidden sm:block">
@@ -185,7 +186,7 @@ export const LessonDetailModal: React.FC<LessonDetailModalProps> = ({
               id="modal-close-btn"
               onClick={onClose}
               className="p-2.5 text-[#5A5245] hover:text-[#1E3E2E] hover:bg-[#F2ECE1] rounded-lg transition-colors min-h-[40px] min-w-[40px] flex items-center justify-center"
-              aria-label="Close dialog"
+              aria-label="ပိတ်မည်"
             >
               <X className="w-6 h-6" />
             </button>
@@ -194,7 +195,6 @@ export const LessonDetailModal: React.FC<LessonDetailModalProps> = ({
 
         {/* Modal Scrollable Body */}
         <div className="p-5 sm:p-8 space-y-8 overflow-y-auto">
-          
           {/* Header Title & Tagline */}
           <div className="space-y-2 pb-4 border-b border-[#EAE2D2]">
             <h2
@@ -203,7 +203,7 @@ export const LessonDetailModal: React.FC<LessonDetailModalProps> = ({
             >
               {principle.title}
             </h2>
-            <p className="text-sm sm:text-base text-[#7A7163] italic">
+            <p className="text-sm text-[#7A7163] italic">
               Original: "{principle.englishTitle}"
             </p>
             <p className="text-base sm:text-lg text-[#3E3831] font-medium leading-relaxed pt-1">
@@ -293,7 +293,11 @@ export const LessonDetailModal: React.FC<LessonDetailModalProps> = ({
             </div>
 
             {/* Context Selector Buttons */}
-            <div className="flex flex-wrap gap-2 pb-2 border-b border-[#F0EAE1]" role="tablist" aria-label="လက်တွေ့ အသုံးချမှု နယ်ပယ်များ">
+            <div
+              className="flex flex-wrap gap-2 pb-2 border-b border-[#F0EAE1]"
+              role="tablist"
+              aria-label="လက်တွေ့ အသုံးချမှု နယ်ပယ်များ"
+            >
               {(
                 [
                   { key: 'business', label: 'Business', icon: Briefcase },
@@ -332,11 +336,9 @@ export const LessonDetailModal: React.FC<LessonDetailModalProps> = ({
               aria-labelledby={`modal-context-tab-${activeContext}`}
               className="space-y-3 bg-[#FAF7F0] p-4 sm:p-5 rounded-xl border border-[#E8E0D2]"
             >
-              <div className="flex items-center justify-between">
-                <h4 className="font-bold text-sm text-[#1E3E2E]">
-                  {contextData.title}
-                </h4>
-                <span className="text-[11px] font-semibold text-[#C25E3E] bg-[#FBECE7] px-2 py-0.5 rounded-sm">
+              <div className="flex flex-wrap items-center justify-between gap-1">
+                <h4 className="font-bold text-sm text-[#1E3E2E]">{contextData.title}</h4>
+                <span className="text-xs font-semibold text-[#C25E3E] bg-[#FBECE7] px-2.5 py-0.5 rounded-md border border-[#F3CFC4]">
                   {contextData.keyTakeaway}
                 </span>
               </div>
@@ -353,7 +355,6 @@ export const LessonDetailModal: React.FC<LessonDetailModalProps> = ({
 
           {/* Section 5: Daily Action Step & Reflection */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            
             {/* Immediate Action Step */}
             <div className="bg-[#E8EFEA] rounded-2xl p-5 sm:p-6 border border-[#C5D9CB] space-y-2.5">
               <div className="flex items-center gap-2 text-[#1E3E2E] font-bold text-sm">
@@ -388,7 +389,7 @@ export const LessonDetailModal: React.FC<LessonDetailModalProps> = ({
                   value={reflectionText}
                   onChange={handleReflectionChange}
                   placeholder="သင့်အတွေး သို့မဟုတ် လက်တွေ့လုပ်ဆောင်ခဲ့မှုကို ဤနေရာတွင် ရေးမှတ်ပါ..."
-                  className="w-full h-20 p-2.5 rounded-xl border border-[#D5CBB9] bg-[#FAF7F0] text-xs text-[#2C2926] focus:outline-hidden focus:ring-2 focus:ring-[#2D5A43] resize-none leading-relaxed"
+                  className="w-full h-20 p-3 rounded-xl border border-[#D5CBB9] bg-[#FAF7F0] text-xs sm:text-sm text-[#2C2926] focus:outline-hidden focus:ring-2 focus:ring-[#2D5A43] resize-none leading-relaxed"
                 />
                 <div className="flex items-center justify-between">
                   {isSavedToast ? (
@@ -396,7 +397,9 @@ export const LessonDetailModal: React.FC<LessonDetailModalProps> = ({
                       <CheckCircle2 className="w-3.5 h-3.5" /> မှတ်စု သိမ်းဆည်းပြီးပါပြီ
                     </span>
                   ) : (
-                    <span className="text-[11px] text-[#7A7163]">စာရိုက်ပြီးသည်နှင့် အလိုအလျောက် သိမ်းဆည်းပါသည်</span>
+                    <span className="text-xs text-[#7A7163]">
+                      စာရိုက်ပြီးသည်နှင့် အလိုအလျောက် သိမ်းဆည်းပါသည်
+                    </span>
                   )}
                   <button
                     type="submit"
@@ -409,9 +412,7 @@ export const LessonDetailModal: React.FC<LessonDetailModalProps> = ({
                 </div>
               </form>
             </div>
-
           </div>
-
         </div>
 
         {/* Modal Bottom Navigation Footer */}
@@ -430,9 +431,7 @@ export const LessonDetailModal: React.FC<LessonDetailModalProps> = ({
             <span>ယခင် သဘောတရား</span>
           </button>
 
-          <span className="text-xs font-bold text-[#6B6357]">
-            {principle.id} / 30
-          </span>
+          <span className="text-xs font-bold text-[#6B6357]">{principle.id} / 30</span>
 
           <button
             id="modal-next-principle-btn"
@@ -448,7 +447,6 @@ export const LessonDetailModal: React.FC<LessonDetailModalProps> = ({
             <ChevronRight className="w-4 h-4" />
           </button>
         </div>
-
       </div>
     </div>
   );
