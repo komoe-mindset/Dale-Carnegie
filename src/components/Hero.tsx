@@ -1,13 +1,16 @@
 import React from 'react';
 import { Principle } from '../types';
-import { ArrowRight, Calendar, Sparkles, CheckCircle2, BookOpen, HelpCircle } from 'lucide-react';
+import { ArrowRight, Calendar, Sparkles, CheckCircle2, BookOpen, HelpCircle, ExternalLink, Bot, Headphones, Play } from 'lucide-react';
+import { GEMINI_GEM_URL } from '../data/geminiGem';
+import { PODCAST_MP3_URL, PODCAST_INFO } from '../data/podcast';
 
 interface HeroProps {
   onSelectPrinciple: (principle: Principle) => void;
   spotlightPrinciple: Principle;
+  onOpenPodcast?: () => void;
 }
 
-export const Hero: React.FC<HeroProps> = ({ onSelectPrinciple, spotlightPrinciple }) => {
+export const Hero: React.FC<HeroProps> = ({ onSelectPrinciple, spotlightPrinciple, onOpenPodcast }) => {
   return (
     <section id="hero-section" className="relative pt-8 pb-16 lg:pt-14 lg:pb-24 overflow-hidden border-b border-[#EFE9DD]">
       {/* Subtle Background Pattern */}
@@ -63,6 +66,111 @@ export const Hero: React.FC<HeroProps> = ({ onSelectPrinciple, spotlightPrincipl
                 <Calendar className="w-4 h-4 text-[#C25E3E]" />
                 <span>ဒီနေ့အတွက် ၁ ခု စကျင့်မယ်</span>
               </a>
+
+              <button
+                type="button"
+                onClick={onOpenPodcast}
+                id="hero-podcast-mp3-btn"
+                className="inline-flex items-center justify-center gap-2 px-5 py-3.5 rounded-xl bg-[#EAF2ED] hover:bg-[#DCE9DF] text-[#1E3E2E] font-semibold text-sm sm:text-base border border-[#C5DDCB] transition-all active:scale-95 min-h-[44px]"
+                title="Dale Carnegie စာအုပ်နှင့် ဝက်ဘ်ဆိုက် အနှစ်ချုပ် Podcast နားဆင်ရန်"
+              >
+                <Headphones className="w-4 h-4 text-[#2D5A43]" />
+                <span>Podcast Mp3 နားဆင်ရန်</span>
+              </button>
+
+              <a
+                href={GEMINI_GEM_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                id="hero-gemini-gem-btn"
+                className="inline-flex items-center justify-center gap-2 px-5 py-3.5 rounded-xl bg-[#FBECE7] hover:bg-[#F6DDD5] text-[#8C3A21] font-semibold text-sm sm:text-base border border-[#F3C8BA] transition-all active:scale-95 min-h-[44px]"
+              >
+                <Sparkles className="w-4 h-4 text-[#C25E3E]" />
+                <span>Gemini AI လမ်းညွှန်နဲ့ မေးမြန်းမယ်</span>
+                <ExternalLink className="w-3.5 h-3.5 text-[#C25E3E]" />
+              </a>
+            </div>
+
+            {/* Interactive Companions: Podcast & Gemini Gem */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {/* Podcast Mp3 Summary Card */}
+              <div className="bg-[#FFFDF9] rounded-2xl p-4 sm:p-5 border border-[#DFCDB9] shadow-xs flex flex-col justify-between gap-3">
+                <div className="flex items-start gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-[#2D5A43] text-white flex items-center justify-center shrink-0 shadow-2xs">
+                    <Headphones className="w-5 h-5 text-[#EAF2ED]" />
+                  </div>
+                  <div className="space-y-0.5">
+                    <div className="flex items-center gap-1.5">
+                      <h3 className="font-bold text-sm text-[#1E3E2E]">
+                        အနှစ်ချုပ် Podcast Mp3
+                      </h3>
+                      <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#EAF2ED] text-[#2D5A43]">
+                        Audio Summary
+                      </span>
+                    </div>
+                    <p className="text-xs text-[#5A5245] leading-relaxed">
+                      ဝက်ဘ်ဆိုက်ပါ အကြောင်းအရာများနှင့် စာအုပ်သဘောတရားများ အနှစ်ချုပ်ကို အသံဖြင့် အေးအေးဆေးဆေး နားဆင်နိုင်ပါသည်။
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2 pt-1 border-t border-[#F2ECE1]">
+                  <button
+                    onClick={onOpenPodcast}
+                    id="hero-podcast-card-play-btn"
+                    className="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-[#2D5A43] hover:bg-[#234735] text-white font-semibold text-xs shadow-2xs transition-all min-h-[40px] active:scale-95"
+                  >
+                    <Play className="w-3.5 h-3.5 fill-current" />
+                    <span>Podcast နားဆင်မည်</span>
+                  </button>
+
+                  <a
+                    href={PODCAST_MP3_URL}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    id="hero-podcast-card-mp3-link"
+                    className="p-2 rounded-xl bg-[#F0EAE1] hover:bg-[#E5DDCF] text-[#4A4036] transition-colors flex items-center justify-center min-h-[40px] min-w-[40px]"
+                    title="Mp3 Link အသစ်ဖွင့်ရန်"
+                  >
+                    <ExternalLink className="w-3.5 h-3.5" />
+                  </a>
+                </div>
+              </div>
+
+              {/* Gemini Gem Interactive Companion Card */}
+              <div className="bg-[#FFFDF9] rounded-2xl p-4 sm:p-5 border border-[#DFCDB9] shadow-xs flex flex-col justify-between gap-3">
+                <div className="flex items-start gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-[#C25E3E] text-white flex items-center justify-center shrink-0 shadow-2xs">
+                    <Bot className="w-5 h-5" />
+                  </div>
+                  <div className="space-y-0.5">
+                    <div className="flex items-center gap-1.5">
+                      <h3 className="font-bold text-sm text-[#1E3E2E]">
+                        Gemini AI လမ်းညွှန် (Gemini Gem)
+                      </h3>
+                      <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#FBECE7] text-[#8C3A21]">
+                        AI Assistant
+                      </span>
+                    </div>
+                    <p className="text-xs text-[#5A5245] leading-relaxed">
+                      သဘောတရား (၃၀) ခု၊ နေ့စဉ် လေ့ကျင့်ခန်းများနှင့် လူမှုဆက်ဆံရေး အခက်အခဲများကို AI ဖြင့် မေးမြန်းဆွေးနွေးနိုင်ပါသည်။
+                    </p>
+                  </div>
+                </div>
+
+                <div className="pt-1 border-t border-[#F2ECE1]">
+                  <a
+                    href={GEMINI_GEM_URL}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    id="hero-gemini-gem-companion-btn"
+                    className="w-full inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-[#8C3A21] hover:bg-[#732F1A] text-white font-semibold text-xs shadow-2xs transition-all min-h-[40px] active:scale-95"
+                  >
+                    <span>Gemini Gem ဖွင့်မည်</span>
+                    <ExternalLink className="w-3.5 h-3.5" />
+                  </a>
+                </div>
+              </div>
             </div>
 
             {/* Highlights Pillars */}

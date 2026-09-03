@@ -16,7 +16,11 @@ import {
   Sparkles,
   BookOpen,
   Send,
+  ExternalLink,
+  Headphones,
 } from 'lucide-react';
+import { GEMINI_GEM_URL } from '../data/geminiGem';
+import { PODCAST_MP3_URL } from '../data/podcast';
 
 interface LessonDetailModalProps {
   principle: Principle | null;
@@ -31,6 +35,7 @@ interface LessonDetailModalProps {
   hasPrev: boolean;
   hasNext: boolean;
   initialContext?: ContextKey | 'all';
+  onOpenPodcast?: () => void;
 }
 
 export const LessonDetailModal: React.FC<LessonDetailModalProps> = ({
@@ -46,6 +51,7 @@ export const LessonDetailModal: React.FC<LessonDetailModalProps> = ({
   hasPrev,
   hasNext,
   initialContext = 'business',
+  onOpenPodcast,
 }) => {
   const getValidContext = (ctx?: string): ContextKey => {
     if (ctx === 'sales' || ctx === 'teaching' || ctx === 'leadership') {
@@ -411,6 +417,76 @@ export const LessonDetailModal: React.FC<LessonDetailModalProps> = ({
                   </button>
                 </div>
               </form>
+            </div>
+          </div>
+
+          {/* Learning Companions Helper Card: Podcast Audio & Gemini Gem AI */}
+          <div className="bg-[#FAF4EA] rounded-2xl p-4 sm:p-5 border border-[#E5DAC6] space-y-4">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-[#2D5A43] text-white flex items-center justify-center shrink-0">
+                  <Headphones className="w-5 h-5" />
+                </div>
+                <div className="space-y-0.5">
+                  <p className="font-bold text-sm text-[#1E3E2E]">
+                    Dale Carnegie စာအုပ်အနှစ်ချုပ် Podcast Mp3 နားဆင်လိုပါသလား?
+                  </p>
+                  <p className="text-xs text-[#5A5245]">
+                    လူမှုဆက်ဆံရေး အခြေခံစည်းမျဉ်း ၃၀ နှင့် စာအုပ်၏ သဘောတရားအနှစ်ချုပ်ကို မြန်မာဘာသာဖြင့် သက်တောင့်သက်သာ နားဆင်နိုင်ပါသည်။
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2 shrink-0 w-full sm:w-auto">
+                {onOpenPodcast && (
+                  <button
+                    type="button"
+                    onClick={onOpenPodcast}
+                    id={`modal-podcast-play-btn-${principle.id}`}
+                    className="flex-1 sm:flex-initial inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl bg-[#2D5A43] hover:bg-[#234735] text-white text-xs font-bold shadow-xs transition-colors min-h-[40px] active:scale-95"
+                  >
+                    <Headphones className="w-3.5 h-3.5" />
+                    <span>Podcast ဖွင့်မည်</span>
+                  </button>
+                )}
+                <a
+                  href={PODCAST_MP3_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  id={`modal-podcast-direct-link-${principle.id}`}
+                  className="inline-flex items-center justify-center gap-1 px-3 py-2.5 rounded-xl bg-[#F0EAE1] hover:bg-[#E5DDCF] text-[#2C2926] text-xs font-semibold border border-[#D5CBB9] min-h-[40px]"
+                  title="MP3 Link တိုက်ရိုက်ဖွင့်ရန်"
+                >
+                  <ExternalLink className="w-3.5 h-3.5" />
+                </a>
+              </div>
+            </div>
+
+            <div className="pt-3 border-t border-[#E5DAC6] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-[#C25E3E] text-white flex items-center justify-center shrink-0">
+                  <Sparkles className="w-5 h-5" />
+                </div>
+                <div className="space-y-0.5">
+                  <p className="font-bold text-sm text-[#1E3E2E]">
+                    ဤသဘောတရားအကြောင်း Gemini AI နှင့် ဆွေးနွေးမေးမြန်းလိုပါသလား?
+                  </p>
+                  <p className="text-xs text-[#5A5245]">
+                    #{principle.id} "{principle.title}" ကို သင့်လက်တွေ့အခြေအနေနှင့် ချိန်ညှိနိုင်ရန် Gemini Gem တွင် ဆွေးနွေးနိုင်ပါသည်။
+                  </p>
+                </div>
+              </div>
+
+              <a
+                href={GEMINI_GEM_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                id={`modal-gemini-gem-btn-${principle.id}`}
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl bg-[#8C3A21] hover:bg-[#732F1A] text-white text-xs font-bold shadow-xs transition-colors shrink-0 min-h-[40px] active:scale-95"
+              >
+                <span>Gemini Gem တွင် မေးမည်</span>
+                <ExternalLink className="w-3.5 h-3.5" />
+              </a>
             </div>
           </div>
         </div>

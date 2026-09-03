@@ -1,12 +1,15 @@
 import React from 'react';
-import { BookOpen, Heart, ArrowUp } from 'lucide-react';
+import { BookOpen, Heart, ArrowUp, Sparkles, ExternalLink, Headphones } from 'lucide-react';
 import { PARTS } from '../data/parts';
+import { GEMINI_GEM_URL } from '../data/geminiGem';
+import { PODCAST_MP3_URL } from '../data/podcast';
 
 interface FooterProps {
   onSelectPart: (partId: 1 | 2 | 3 | 4) => void;
+  onOpenPodcast?: () => void;
 }
 
-export const Footer: React.FC<FooterProps> = ({ onSelectPart }) => {
+export const Footer: React.FC<FooterProps> = ({ onSelectPart, onOpenPodcast }) => {
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -42,6 +45,40 @@ export const Footer: React.FC<FooterProps> = ({ onSelectPart }) => {
                 — Dale Carnegie (1888–1955)
               </p>
             </div>
+
+            {/* Action Buttons: Podcast Mp3 & Gemini Gem */}
+            <div className="space-y-2 pt-1">
+              {/* Podcast Mp3 Button */}
+              <button
+                type="button"
+                onClick={onOpenPodcast}
+                id="footer-podcast-mp3-btn"
+                className="w-full inline-flex items-center justify-between p-3 rounded-xl bg-[#2C4A3A] hover:bg-[#233C2F] text-white text-xs font-bold transition-all shadow-xs min-h-[44px]"
+              >
+                <div className="flex items-center gap-2">
+                  <Headphones className="w-4 h-4 text-[#A7CDB9]" />
+                  <span>Dale Carnegie Podcast Mp3 နားဆင်ပါ</span>
+                </div>
+                <span className="text-[10px] bg-[#1E3E2E] px-2 py-0.5 rounded text-[#A7CDB9]">
+                  Audio
+                </span>
+              </button>
+
+              {/* Gemini Gem Direct CTA */}
+              <a
+                href={GEMINI_GEM_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                id="footer-gemini-gem-btn"
+                className="w-full inline-flex items-center justify-between p-3 rounded-xl bg-[#2D5A43] hover:bg-[#234735] text-white text-xs font-bold transition-all shadow-xs min-h-[44px]"
+              >
+                <div className="flex items-center gap-2">
+                  <Sparkles className="w-4 h-4 text-[#C25E3E]" />
+                  <span>Dale Carnegie Gemini Gem ဖြင့် ဆွေးနွေးပါ</span>
+                </div>
+                <ExternalLink className="w-3.5 h-3.5" />
+              </a>
+            </div>
           </div>
 
           {/* Quick Navigation Links */}
@@ -50,6 +87,28 @@ export const Footer: React.FC<FooterProps> = ({ onSelectPart }) => {
               အဓိက အပိုင်းကဏ္ဍများ
             </h4>
             <ul className="space-y-2 text-xs sm:text-sm">
+              <li>
+                <a
+                  href={PODCAST_MP3_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-[#A7CDB9] hover:text-[#CBE5D7] transition-colors flex items-center gap-1.5 font-semibold"
+                >
+                  <Headphones className="w-3.5 h-3.5 text-[#A7CDB9]" />
+                  <span>Podcast Mp3 (အနှစ်ချုပ် အသံဖိုင်) ↗</span>
+                </a>
+              </li>
+              <li>
+                <a
+                  href={GEMINI_GEM_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-[#E58869] hover:text-[#FFB199] transition-colors flex items-center gap-1.5 font-semibold"
+                >
+                  <Sparkles className="w-3.5 h-3.5 text-[#C25E3E]" />
+                  <span>Gemini AI Gem (အမေး/အဖြေ) ↗</span>
+                </a>
+              </li>
               <li>
                 <a href="#about-book" className="hover:text-[#FBF9F5] transition-colors">
                   စာအုပ်အကြောင်း

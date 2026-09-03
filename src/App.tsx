@@ -1,7 +1,8 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { Principle, UserProgress, ContextKey } from './types';
 import { ALL_PRINCIPLES, getPrincipleById } from './data/principles';
 import { loadProgress, saveProgress, clearAllProgress } from './utils/storage';
+import { PODCAST_MP3_URL } from './data/podcast';
 import { Header } from './components/Header';
 import { Hero } from './components/Hero';
 import { BookIntroduction } from './components/BookIntroduction';
@@ -13,6 +14,8 @@ import { PracticePlan } from './components/PracticePlan';
 import { ReflectionSection } from './components/ReflectionSection';
 import { BookRecommendationAndDisclaimer } from './components/BookRecommendationAndDisclaimer';
 import { BookmarksModal } from './components/BookmarksModal';
+import { GeminiGemFloatingButton } from './components/GeminiGemFloatingButton';
+import { PodcastPlayerModal } from './components/PodcastPlayerModal';
 import { Footer } from './components/Footer';
 
 export function App() {
@@ -22,6 +25,55 @@ export function App() {
   const [selectedPartFilter, setSelectedPartFilter] = useState<number | null>(null);
   const [selectedContext, setSelectedContext] = useState<ContextKey | 'all'>('all');
   const [activeSection, setActiveSection] = useState<string>('');
+
+  // Podcast Audio Playback State
+  const [isPodcastOpen, setIsPodcastOpen] = useState<boolean>(false);
+  const [isPodcastMinimized, setIsPodcastMinimized] = useState<boolean>(false);
+  const [isAudioPlaying, setIsAudioPlaying] = useState<boolean>(false);
+  const [currentTime, setCurrentTime] = useState<number>(0);
+  const [duration, setDuration] = useState<number>(0);
+  const [playbackRate, setPlaybackRate] = useState<number>(1);
+  const [isMuted, setIsMuted] = useState<boolean>(false);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  const handleOpenPodcast = () => {
+    setIsPodcastOpen(true);
+    setIsPodcastMinimized(false);
+    if (audioRef.current && !isAudioPlaying) {
+      audioRef.current.play().catch(() => {});
+    }
+  };
+
+  const handleTogglePlay = () => {
+    if (!audioRef.current) return;
+    if (isAudioPlaying) {
+      audioRef.current.pause();
+    } else {
+      audioRef.current.play().catch(() => {});
+    }
+  };
+
+  const handleSeek = (time: number) => {
+    if (audioRef.current) {
+      audioRef.current.currentTime = time;
+      setCurrentTime(time);
+    }
+  };
+
+  const handleChangePlaybackRate = (rate: number) => {
+    setPlaybackRate(rate);
+    if (audioRef.current) {
+      audioRef.current.playbackRate = rate;
+    }
+  };
+
+  const handleToggleMute = () => {
+    if (audioRef.current) {
+      const nextMuted = !isMuted;
+      audioRef.current.muted = nextMuted;
+      setIsMuted(nextMuted);
+    }
+  };
 
   // Save progress changes to localStorage
   useEffect(() => {
@@ -145,12 +197,30 @@ export function App() {
 
   return (
     <div className="min-h-screen bg-[#FBF9F5] text-[#2C2926] flex flex-col font-sans selection:bg-[#2D5A43] selection:text-white">
+      {/* Hidden Audio Element for Global Playback */}
+      <audio
+        ref={audioRef}
+        src={PODCAST_MP3_URL}
+        preload="metadata"
+        onTimeUpdate={() => {
+          if (audioRef.current) setCurrentTime(audioRef.current.currentTime);
+        }}
+        onLoadedMetadata={() => {
+          if (audioRef.current) setDuration(audioRef.current.duration);
+        }}
+        onPlay={() => setIsAudioPlaying(true)}
+        onPause={() => setIsAudioPlaying(false)}
+        onEnded={() => setIsAudioPlaying(false)}
+      />
+
       {/* Header */}
       <Header
         progress={progress}
         onOpenBookmarks={() => setIsBookmarksOpen(true)}
         onOpenSearch={handleOpenSearch}
         activeSection={activeSection}
+        onOpenPodcast={handleOpenPodcast}
+        isAudioPlaying={isAudioPlaying}
       />
 
       {/* Main Content */}
@@ -159,10 +229,11 @@ export function App() {
         <Hero
           onSelectPrinciple={(principle) => setActivePrincipleModal(principle)}
           spotlightPrinciple={spotlightPrinciple}
+          onOpenPodcast={handleOpenPodcast}
         />
 
         {/* 2. Book Introduction & Key Lessons */}
-        <BookIntroduction />
+        <BookIntroduction onOpenPodcast={handleOpenPodcast} />
 
         {/* 3. Real-world Application Contexts (Business, Sales, Teaching, Leadership) */}
         <ApplicationOverview
@@ -207,7 +278,38 @@ export function App() {
       </main>
 
       {/* Footer */}
-      <Footer onSelectPart={(partId) => setSelectedPartFilter(partId)} />
+      <Footer
+        onSelectPart={(partId) => setSelectedPartFilter(partId)}
+        onOpenPodcast={handleOpenPodcast}
+      />
+
+      {/* Floating Gemini Gem & Podcast Access Buttons */}
+      <GeminiGemFloatingButton
+        onOpenPodcast={handleOpenPodcast}
+        isAudioPlaying={isAudioPlaying}
+      />
+
+      {/* Global Podcast Player Modal & Minimized Bar */}
+      <PodcastPlayerModal
+        isOpen={isPodcastOpen}
+        onClose={() => {
+          setIsPodcastOpen(false);
+          setIsPodcastMinimized(false);
+          if (audioRef.current) audioRef.current.pause();
+        }}
+        isMinimized={isPodcastMinimized}
+        onToggleMinimize={() => setIsPodcastMinimized(!isPodcastMinimized)}
+        isPlaying={isAudioPlaying}
+        onTogglePlay={handleTogglePlay}
+        audioRef={audioRef}
+        currentTime={currentTime}
+        duration={duration}
+        onSeek={handleSeek}
+        playbackRate={playbackRate}
+        onChangePlaybackRate={handleChangePlaybackRate}
+        isMuted={isMuted}
+        onToggleMute={handleToggleMute}
+      />
 
       {/* Principle Detail Modal Dialog */}
       {activePrincipleModal && (
@@ -224,6 +326,7 @@ export function App() {
           hasPrev={currentPrincipleIndex > 0}
           hasNext={currentPrincipleIndex < ALL_PRINCIPLES.length - 1}
           initialContext={selectedContext}
+          onOpenPodcast={handleOpenPodcast}
         />
       )}
 

@@ -1,12 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { BookOpen, CheckCircle2, Menu, X, Bookmark, Search } from 'lucide-react';
+import { BookOpen, CheckCircle2, Menu, X, Bookmark, Search, Sparkles, ExternalLink, Headphones } from 'lucide-react';
 import { UserProgress } from '../types';
+import { GEMINI_GEM_URL } from '../data/geminiGem';
+import { PODCAST_MP3_URL } from '../data/podcast';
 
 interface HeaderProps {
   progress: UserProgress;
   onOpenBookmarks: () => void;
   onOpenSearch: () => void;
   activeSection: string;
+  onOpenPodcast?: () => void;
+  isAudioPlaying?: boolean;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -14,6 +18,8 @@ export const Header: React.FC<HeaderProps> = ({
   onOpenBookmarks,
   onOpenSearch,
   activeSection,
+  onOpenPodcast,
+  isAudioPlaying = false,
 }) => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -121,6 +127,36 @@ export const Header: React.FC<HeaderProps> = ({
 
           {/* Header Action Buttons */}
           <div className="flex items-center gap-2 sm:gap-3">
+            {/* Podcast MP3 Button */}
+            <button
+              id="header-podcast-btn"
+              onClick={onOpenPodcast}
+              className="inline-flex items-center gap-1.5 px-3 py-2 bg-[#EAEFEA] hover:bg-[#DCE7DC] text-[#1E3E2E] rounded-xl text-xs font-bold transition-all border border-[#C6D8C8] shadow-2xs min-h-[44px]"
+              title="Dale Carnegie ၏ စာအုပ်နှင့် ဝက်ဘ်ဆိုက် အနှစ်ချုပ် Podcast နားဆင်ရန်"
+            >
+              <Headphones className="w-3.5 h-3.5 text-[#2D5A43]" />
+              <span className="hidden lg:inline">Podcast အနှစ်ချုပ်</span>
+              <span className="lg:hidden">Podcast</span>
+              {isAudioPlaying && (
+                <span className="w-2 h-2 rounded-full bg-[#2D5A43] animate-pulse" />
+              )}
+            </button>
+
+            {/* Gemini Gem Button */}
+            <a
+              href={GEMINI_GEM_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              id="header-gemini-gem-btn"
+              className="hidden sm:inline-flex items-center gap-1.5 px-3 py-2 bg-[#F5EFE4] hover:bg-[#EAE0CF] text-[#8C3A21] hover:text-[#702914] rounded-xl text-xs font-bold transition-all border border-[#DFD3C0] shadow-2xs min-h-[44px]"
+              title="Dale Carnegie Gemini Gem AI လမ်းညွှန်ဖြင့် ဆွေးနွေးမေးမြန်းပါ"
+            >
+              <Sparkles className="w-3.5 h-3.5 text-[#C25E3E]" />
+              <span className="hidden md:inline">Gemini AI လမ်းညွှန်</span>
+              <span className="md:hidden">Gemini</span>
+              <ExternalLink className="w-3 h-3 text-[#A86445]" />
+            </a>
+
             {/* Quick Search Button */}
             <button
               id="header-search-btn"
@@ -198,6 +234,49 @@ export const Header: React.FC<HeaderProps> = ({
           </div>
 
           <nav className="flex flex-col gap-1" aria-label="Mobile Navigation">
+            {/* Podcast Card in Mobile Menu */}
+            <button
+              id="mobile-nav-podcast-btn"
+              onClick={() => {
+                setMobileMenuOpen(false);
+                if (onOpenPodcast) onOpenPodcast();
+              }}
+              className="p-3 mb-2 rounded-xl bg-[#EAF2ED] border border-[#BFD9C7] text-[#1E3E2E] shadow-2xs flex items-center justify-between min-h-[48px] text-left w-full"
+            >
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-lg bg-[#2D5A43] text-white flex items-center justify-center shrink-0">
+                  <Headphones className="w-4 h-4" />
+                </div>
+                <div>
+                  <p className="text-xs font-bold text-[#1E3E2E]">Dale Carnegie Podcast Mp3 နားဆင်ရန်</p>
+                  <p className="text-[11px] text-[#4A5D52]">စာအုပ်နှင့် ဝက်ဘ်ဆိုက် အနှစ်ချုပ် အသံဖိုင်</p>
+                </div>
+              </div>
+              <span className="text-xs font-bold text-[#2D5A43] px-2 py-1 rounded-md bg-white/70">
+                Play
+              </span>
+            </button>
+
+            <a
+              href={GEMINI_GEM_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              id="mobile-nav-gemini-gem-btn"
+              onClick={() => setMobileMenuOpen(false)}
+              className="p-3 mb-2 rounded-xl bg-[#FAF6EE] border border-[#DFCDB9] text-[#1E3E2E] shadow-2xs flex items-center justify-between min-h-[48px]"
+            >
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-lg bg-[#C25E3E] text-white flex items-center justify-center shrink-0">
+                  <Sparkles className="w-4 h-4" />
+                </div>
+                <div>
+                  <p className="text-xs font-bold text-[#1E3E2E]">Gemini AI လမ်းညွှန် (Gemini Gem)</p>
+                  <p className="text-[11px] text-[#6B6357]">ဝက်ဘ်ဆိုက်နှင့် စာအုပ်အကြောင်း AI ဖြင့် မေးရန်</p>
+                </div>
+              </div>
+              <ExternalLink className="w-4 h-4 text-[#C25E3E] shrink-0" />
+            </a>
+
             {navLinks.map((link) => (
               <a
                 key={link.href}

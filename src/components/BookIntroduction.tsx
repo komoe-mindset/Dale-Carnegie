@@ -1,7 +1,13 @@
 import React from 'react';
-import { BookOpen, Award, Compass, HeartHandshake, ShieldCheck, Sparkles, Check } from 'lucide-react';
+import { BookOpen, Award, Compass, HeartHandshake, ShieldCheck, Sparkles, Check, ExternalLink, Bot, MessageSquare, Headphones, Play } from 'lucide-react';
+import { GEMINI_GEM_URL, GEMINI_GEM_INFO } from '../data/geminiGem';
+import { PODCAST_MP3_URL, PODCAST_INFO } from '../data/podcast';
 
-export const BookIntroduction: React.FC = () => {
+interface BookIntroductionProps {
+  onOpenPodcast?: () => void;
+}
+
+export const BookIntroduction: React.FC<BookIntroductionProps> = ({ onOpenPodcast }) => {
   const keyTakeaways = [
     {
       title: 'လူ့သဘာဝကို နားလည်ခြင်း (Human Psychology)',
@@ -113,6 +119,140 @@ export const BookIntroduction: React.FC = () => {
             </div>
           </div>
 
+        </div>
+
+        {/* Learning Companions: Audio Podcast & Gemini AI */}
+        <div className="mt-12 space-y-6">
+          {/* Section Header */}
+          <div className="flex items-center gap-2">
+            <Sparkles className="w-4 h-4 text-[#C25E3E]" />
+            <h3 className="text-base sm:text-lg font-bold text-[#1E3E2E] font-serif-heading">
+              လေ့လာသင်ယူမှု အထောက်အကူပြု အရင်းအမြစ်များ (Media & AI Companions)
+            </h3>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Podcast MP3 Audio Summary Card */}
+            <div className="bg-gradient-to-br from-[#FFFDF9] to-[#F5F9F6] rounded-3xl p-6 sm:p-8 border border-[#CFDFD4] shadow-xs flex flex-col justify-between space-y-6">
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#EAF2ED] text-[#2D5A43] text-xs font-bold border border-[#C5DDCB]">
+                    <Headphones className="w-3.5 h-3.5 text-[#2D5A43]" />
+                    <span>တရားဝင် Podcast Mp3 (Audio Summary)</span>
+                  </div>
+                  <span className="text-[11px] font-bold text-[#6B6357] bg-[#FAF7F0] px-2.5 py-0.5 rounded-full border border-[#E8DFC8]">
+                    MP3 Audio
+                  </span>
+                </div>
+
+                <div className="space-y-1">
+                  <h4 className="font-serif-heading text-lg sm:text-xl font-bold text-[#1E3E2E] leading-snug">
+                    {PODCAST_INFO.title}
+                  </h4>
+                  <p className="text-xs sm:text-sm text-[#4A5D52] font-medium">
+                    {PODCAST_INFO.subtitle}
+                  </p>
+                </div>
+
+                <p className="text-xs sm:text-sm text-[#4A4036] leading-relaxed">
+                  {PODCAST_INFO.description}
+                </p>
+
+                {/* Features List */}
+                <div className="space-y-1.5 pt-1">
+                  {PODCAST_INFO.features.map((feat, idx) => (
+                    <div key={idx} className="flex items-start gap-2 text-xs text-[#3E3831]">
+                      <Check className="w-3.5 h-3.5 text-[#2D5A43] shrink-0 mt-0.5" />
+                      <span>{feat}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="pt-4 border-t border-[#D9E7DE] flex flex-col sm:flex-row items-center gap-3">
+                <button
+                  type="button"
+                  onClick={onOpenPodcast}
+                  id="book-intro-podcast-play-btn"
+                  className="w-full sm:flex-1 inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-[#2D5A43] hover:bg-[#234735] text-white font-semibold text-xs sm:text-sm shadow-xs transition-all active:scale-95 min-h-[44px]"
+                >
+                  <Play className="w-4 h-4 fill-current" />
+                  <span>Podcast နားဆင်မည်</span>
+                </button>
+
+                <a
+                  href={PODCAST_MP3_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  id="book-intro-podcast-mp3-link"
+                  className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 px-4 py-3 rounded-xl bg-[#F0EAE1] hover:bg-[#E5DDCF] text-[#2C2926] font-semibold text-xs border border-[#D5CBB9] transition-all min-h-[44px]"
+                  title="MP3 Link တိုက်ရိုက်ဖွင့်ရန်"
+                >
+                  <ExternalLink className="w-3.5 h-3.5 text-[#2D5A43]" />
+                  <span>Mp3 Link တိုက်ရိုက်</span>
+                </a>
+              </div>
+            </div>
+
+            {/* Gemini Gem Interactive Companion Showcase */}
+            <div className="bg-gradient-to-br from-[#FFFDF9] to-[#FAF5EB] rounded-3xl p-6 sm:p-8 border border-[#DFCDB9] shadow-xs flex flex-col justify-between space-y-6">
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#FBECE7] text-[#8C3A21] text-xs font-bold border border-[#F5C7B7]">
+                    <Bot className="w-3.5 h-3.5 text-[#C25E3E]" />
+                    <span>သီးသန့် AI သင်ကြားရေး လက်ထောက်</span>
+                  </div>
+                  <span className="text-[11px] font-bold text-[#8C3A21] bg-[#FDF1ED] px-2.5 py-0.5 rounded-full border border-[#F5C7B7]">
+                    Gemini Gem
+                  </span>
+                </div>
+
+                <div className="space-y-1">
+                  <h4 className="font-serif-heading text-lg sm:text-xl font-bold text-[#1E3E2E] leading-snug">
+                    {GEMINI_GEM_INFO.title}
+                  </h4>
+                  <p className="text-xs sm:text-sm text-[#8C3A21] font-medium">
+                    {GEMINI_GEM_INFO.subtitle}
+                  </p>
+                </div>
+
+                <p className="text-xs sm:text-sm text-[#4A4036] leading-relaxed">
+                  {GEMINI_GEM_INFO.description} စာအုပ်ပါ သဘောတရားများ၏ မူလရည်ရွယ်ချက်နှင့် လက်ရှိအခက်အခဲများကို စိတ်တိုင်းကျ မေးမြန်းနိုင်ပါသည်။
+                </p>
+
+                {/* Suggested Questions */}
+                <div className="space-y-1.5 pt-1">
+                  <p className="text-xs font-bold text-[#6B6357] flex items-center gap-1.5">
+                    <MessageSquare className="w-3.5 h-3.5 text-[#2D5A43]" />
+                    <span>နမူနာ မေးခွန်းများ:</span>
+                  </p>
+                  <div className="flex flex-wrap gap-1.5">
+                    {GEMINI_GEM_INFO.suggestedQuestions.slice(0, 2).map((q, idx) => (
+                      <span
+                        key={idx}
+                        className="inline-block px-2.5 py-1 rounded-md bg-[#F2ECE1] text-[#3E3831] text-[11px] font-medium border border-[#E5DAC6]"
+                      >
+                        "{q}"
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              <div className="pt-4 border-t border-[#E8DFC8]">
+                <a
+                  href={GEMINI_GEM_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  id="book-intro-gemini-gem-btn"
+                  className="w-full inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-[#8C3A21] hover:bg-[#732F1A] text-white font-semibold text-xs sm:text-sm shadow-xs hover:shadow-md transition-all active:scale-95 min-h-[44px]"
+                >
+                  <span>Gemini Gem ဖွင့်မည်</span>
+                  <ExternalLink className="w-4 h-4" />
+                </a>
+              </div>
+            </div>
+          </div>
         </div>
 
       </div>
